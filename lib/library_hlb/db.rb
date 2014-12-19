@@ -92,7 +92,7 @@ class Library::HLB::DB
     node.xpath(xp).each do |n|
       ta = topic_array.dup.push n.get(:name)
       n.xpath('call-numbers').each do |cn|
-        self.add_range Library::HLB::CallNumberRange.new_from_nokogiri_node(cn, ta)
+        self.add_range Library::HLB::CallNumberRange.new_from_oga_node(cn, ta)
       end
       build_nodes(n, path.dup, ta)
     end
@@ -121,10 +121,10 @@ class Library::HLB::DB
   # Sort the ranges by start
   def sort_ranges!
     @ranges.values.each do |arr|
-      arr.sort! { |a, b| a.start_num <=> b.start_num }
+      arr.sort! { |a, b| a.begin_num <=> b.begin_num }
     end
     @topics.values.each do |arr|
-      arr.sort! { |a, b| a.start_num <=> b.start_num }
+      arr.sort! { |a, b| a.begin_num <=> b.begin_num }
     end
   end
 

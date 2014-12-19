@@ -14,36 +14,41 @@ class Library::HLB::CallNumberRangeSet < Array
 
 end
 
+
+# A callnumber-range turns callnumbers into integers (or bigints
+# for ZZ* callnumbers). It responds much as a Range does (#begin,
+# #end, #covers)
+
 class Library::HLB::CallNumberRange
 
-  attr_reader :start, :stop, :start_num, :stop_num, :letter
+  attr_reader :begin, :end, :begin_num, :end_num, :letter
 
   attr_accessor :topic_array, :redundant
 
   def initialize(start=nil, stop=nil, topic_array = [])
     @illegal = false
     @redundant = false
-    self.start = start
-    self.stop  = stop
+    self.begin = start
+    self.end  = stop
     @topic_array = topic_array
   end
 
   def reconstitute(start, stop, start_num, stop_num, letter, topic_array)
-    @start = start
-    @stop = stop
-    @start_num = start_num
-    @stop_num = stop_num
+    @begin = start
+    @end = stop
+    @begin_num = start_num
+    @end_num = stop_num
     @letter = letter
     @topic_array = topic_array
   end
 
   def to_s
-    "[#{start} - #{stop}]"
+    "[#{self.begin} - #{self.end}]"
   end
 
   def ==(other)
-    @start_num == other.start_num and
-        @stop_num == other.stop_num and
+    @begin_num == other.begin_num and
+        @end_num == other.end_num and
         @topic_array == other.topic_array
   end
 
@@ -52,7 +57,7 @@ class Library::HLB::CallNumberRange
   def to_json(*a)
     {
       'json_class' => self.class.name,
-      'data' => [@start, @stop, @start_num, @stop_num, @letter, @topic_array]
+      'data' => [@begin, @end, @begin_num, @end_num, @letter, @topic_array]
     }.to_json(*a)
   end
 
@@ -65,14 +70,14 @@ class Library::HLB::CallNumberRange
   # We take advantage of the fact that no HLB ranges cross first-letter
   # boundaries and set it here
   #
-  # In both start= and stop=, we also rescue any parsing errors
+  # In both begin= and end=, we also rescue any parsing errors
   # and simply set the @illegal flag so we can use it later on.
-  def start=(x)
-    @start = x
+  def begin=(x)
+    @begin = x
     return if x.nil?
     begin
       @letter = x.upcase.strip[0]
-      @start_num = Library::HLB::BigNum.from_lc(x)
+      @begin_num = Library::HLB::BigNum.from_lc(x)
     rescue => e
       @illegal = true
       puts "Error: #{e}. Can't work with #{self}"
@@ -81,13 +86,13 @@ class Library::HLB::CallNumberRange
   end
 
   # Same as start. Set the illegal flag if we get an error
-  def stop=(x)
-    @stop = x
+  def end=(x)
+    @end = x
     return if x.nil?
     letter = x.upcase.strip[0]
     $stderr.puts "Crossing letter-lines! #{self}" if @letter and @letter != letter
     begin
-      @stop_num = Library::HLB::BigNum.from_lc(x)
+      @end_num = Library::HLB::BigNum.from_lc(x)
     rescue
       @illegal = true
     end
@@ -99,14 +104,17 @@ class Library::HLB::CallNumberRange
 
 
   def surrounds(other)
-    @start_num <= other.start_num and @stop_num >= other.stop_num
+    @begin_num <= other.begin_num and @end_num >= other.end_num
   end
 
   def contains_int(int)
-    @start_num <= int and @stop_num >= int
+    @begin_num <= int and @end_num >= int
   end
 
-  def self.new_from_nokogiri_node(n, topic_array)
+  alias_method :cover?, :contains_int
+  alias_method :member?, :member?
+
+  def self.new_from_oga_node(n, topic_array)
     self.new(n.get(:start), n.get(:end), topic_array)
   end
 
