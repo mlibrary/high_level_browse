@@ -20,8 +20,9 @@ end
 # #end, #covers)
 
 class Library::HLB::CallNumberRange
+  include Comparable
 
-  attr_reader :begin, :end, :begin_num, :end_num, :letter
+  attr_reader :begin, :end, :begin_raw, :end_raw, :letter
 
   attr_accessor :topic_array, :redundant
 
@@ -33,11 +34,23 @@ class Library::HLB::CallNumberRange
     @topic_array = topic_array
   end
 
+
+  # Compare based on begin, then end
+  def <=>(o)
+    b = self.begin <=> o.begin
+    if b == 0
+      self.end <=> o.end
+    else
+      b
+    end
+  end
+
+
   def reconstitute(start, stop, start_num, stop_num, letter, topic_array)
     @begin = start
     @end = stop
-    @begin_num = start_num
-    @end_num = stop_num
+    @begin_raw = start_raw
+    @end_raw = stop_raw
     @letter = letter
     @topic_array = topic_array
   end
@@ -47,8 +60,8 @@ class Library::HLB::CallNumberRange
   end
 
   def ==(other)
-    @begin_num == other.begin_num and
-        @end_num == other.end_num and
+    @begin == other.begin and
+        @end == other.end and
         @topic_array == other.topic_array
   end
 
@@ -57,7 +70,7 @@ class Library::HLB::CallNumberRange
   def to_json(*a)
     {
       'json_class' => self.class.name,
-      'data' => [@begin, @end, @begin_num, @end_num, @letter, @topic_array]
+      'data' => [@begin, @end, @begin_raw, @end_raw, @letter, @topic_array]
     }.to_json(*a)
   end
 
@@ -73,11 +86,11 @@ class Library::HLB::CallNumberRange
   # In both begin= and end=, we also rescue any parsing errors
   # and simply set the @illegal flag so we can use it later on.
   def begin=(x)
-    @begin = x
+    @begin_raw = x
     return if x.nil?
     begin
       @letter = x.upcase.strip[0]
-      @begin_num = Library::HLB::BigNum.from_lc(x)
+      @begin = Library::HLB::BigNum.from_lc(x)
     rescue => e
       @illegal = true
       puts "Error: #{e}. Can't work with #{self}"
@@ -87,12 +100,12 @@ class Library::HLB::CallNumberRange
 
   # Same as start. Set the illegal flag if we get an error
   def end=(x)
-    @end = x
+    @end_raw = x
     return if x.nil?
     letter = x.upcase.strip[0]
     $stderr.puts "Crossing letter-lines! #{self}" if @letter and @letter != letter
     begin
-      @end_num = Library::HLB::BigNum.from_lc(x)
+      @end = Library::HLB::BigNum.from_lc(x)
     rescue
       @illegal = true
     end
@@ -104,15 +117,15 @@ class Library::HLB::CallNumberRange
 
 
   def surrounds(other)
-    @begin_num <= other.begin_num and @end_num >= other.end_num
+    @begin <= other.begin and @end >= other.end
   end
 
   def contains_int(int)
-    @begin_num <= int and @end_num >= int
+    @begin <= int and @end >= int
   end
 
-  alias_method :cover?, :contains_int
-  alias_method :member?, :member?
+  alias_method :cover?,  :contains_int
+  alias_method :member?, :contains_int
 
   def self.new_from_oga_node(n, topic_array)
     self.new(n.get(:start), n.get(:end), topic_array)
