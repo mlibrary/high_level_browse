@@ -56,7 +56,7 @@ class Library::HLB::CallNumberRange
   end
 
   def to_s
-    "[#{self.begin} - #{self.end}]"
+    "[#{self.begin_raw} - #{self.end_raw}]"
   end
 
   def ==(other)
