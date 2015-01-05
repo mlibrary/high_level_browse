@@ -24,7 +24,7 @@ module Library::HLB::BigNum
     lc = LCCallNumber.parse(x)
     raise Library::HLB::IllegalLC.new(x) unless lc.valid?
 
-    letters = ('%3s' % lc.letters).gsub(' ', 64.chr).chars.map(&:ord).map{|x| x - 64}
+    letters = ('%-3s' % lc.letters).gsub(' ', 64.chr).chars.map(&:ord).map{|x| x - 64}
     digits = ('%11.5f' % lc.digits).split('.').map(&:to_i)
     digits[1] ||= 0
     cutter = lc.firstcutter || LCCallNumber::Cutter.new(' ', 0)
