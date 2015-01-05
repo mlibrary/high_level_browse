@@ -115,7 +115,7 @@ class RedBlackTree
     root.color = Node::BLACK
   end
 
-  alias << insert
+  alias << add
 
   def delete(z)
     y = (z.left.nil? || z.right.nil?) ? z : successor(z)

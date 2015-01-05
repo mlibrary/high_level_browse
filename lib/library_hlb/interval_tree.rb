@@ -1,10 +1,10 @@
 require 'library_hlb/red_black_tree'
 
 # An interval tree consist of a bunch of keys that
-#  * have a begin and endoint (e.g., they represent ranges)
+#  * have a begin and endpoint (e.g., they represent ranges)
 #  * when sorted, are sorted by the begin (r.begin <=> s.begin)
 #  * respond to #begin and #end to get the two endpoints
-#
+#  * respond to #cover?(k) to determine if k is within the endpoints
 
 
 class RedBlackTree::Node
@@ -25,9 +25,9 @@ class RedBlackTree::Node
 
   def keys_that_cover(tk)
     return [] if self.nil? or @max_endpoint < tk
-    return left.keys_that_cover(k) unless key.begin <= tk
+    return left.keys_that_cover(tk) unless key.begin <= tk
     rv = []
-    rv << key if key.end >= tk
+    rv << key if key.cover?(tk)
     return rv.concat(left.keys_that_cover(tk)).concat(right.keys_that_cover(tk))
   end
 
@@ -36,9 +36,6 @@ end
 class Library::HLB::IntervalTree < RedBlackTree
 
   class Node < RedBlackTree::Node
-
-
-
   end
 
 

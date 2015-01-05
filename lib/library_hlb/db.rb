@@ -26,7 +26,7 @@ class Library::HLB::DB
       letter = norm[0]
       @ranges[letter].topics_for(str)
      rescue => e
-      $stderr.puts "#{e}"
+      $stderr.puts "Failure on #{str}: #{e}\n#{e.backtrace}"
       []
     end
   end
@@ -121,10 +121,10 @@ class Library::HLB::DB
   # Sort the ranges by start
   def sort_ranges!
     @ranges.values.each do |arr|
-      arr.sort! { |a, b| a.begin_num <=> b.begin_num }
+      arr.sort! { |a, b| a.begin_str <=> b.begin_str }
     end
     @topics.values.each do |arr|
-      arr.sort! { |a, b| a.begin_num <=> b.begin_num }
+      arr.sort! { |a, b| a.begin_str <=> b.begin_str }
     end
   end
 

@@ -1,17 +1,33 @@
 require 'lc_callnumber'
 require 'library_hlb/bignum'
-require 'Set'
+require 'library_hlb/interval_tree'
+require 'set'
 
-class Library::HLB::CallNumberRangeSet < Array
+#class Library::HLB::CallNumberRangeSet < Array
+#  def topics_for(str)
+#    big    = Library::HLB::BigNum.from_lc(str)
+#    topics = Set.new
+#    comps = 0
+#    self.each do |cnr|
+#      comps += 1
+#      topics << cnr.topic_array if cnr.contains_int(big)
+#    end
+#    $stderr.puts "Made #{comps} comparisons"
+#    topics
+#  end
+#
+#end
+
+
+class Library::HLB::CallNumberRangeSet < Library::HLB::IntervalTree
   def topics_for(str)
     big    = Library::HLB::BigNum.from_lc(str)
     topics = Set.new
-    self.each do |cnr|
-      topics << cnr.topic_array if cnr.contains_int(big)
+    self.keys_that_cover(big).each do |k|
+      topics << k.topic_array
     end
     topics
   end
-
 end
 
 
@@ -22,15 +38,15 @@ end
 class Library::HLB::CallNumberRange
   include Comparable
 
-  attr_reader :begin, :end, :begin_raw, :end_raw, :letter
+  attr_reader :begin, :end, :begin_str, :end_str, :letter
 
   attr_accessor :topic_array, :redundant
 
   def initialize(start=nil, stop=nil, topic_array = [])
     @illegal = false
     @redundant = false
-    self.begin = start
-    self.end  = stop
+    self.begin_str = start
+    self.end_str  = stop
     @topic_array = topic_array
   end
 
@@ -46,17 +62,17 @@ class Library::HLB::CallNumberRange
   end
 
 
-  def reconstitute(start, stop, start_num, stop_num, letter, topic_array)
-    @begin = start
-    @end = stop
-    @begin_raw = start_raw
-    @end_raw = stop_raw
+  def reconstitute(begin_str, end_str, begin_num, end_num, letter, topic_array)
+    @begin_str = begin_str
+    @end_str = end_str
+    @begin = begin_num
+    @end = end_num
     @letter = letter
     @topic_array = topic_array
   end
 
   def to_s
-    "[#{self.begin_raw} - #{self.end_raw}]"
+    "[#{self.begin_str} - #{self.end_str}]"
   end
 
   def ==(other)
@@ -70,7 +86,7 @@ class Library::HLB::CallNumberRange
   def to_json(*a)
     {
       'json_class' => self.class.name,
-      'data' => [@begin, @end, @begin_raw, @end_raw, @letter, @topic_array]
+      'data' => [@begin_str, @end_str, @begin, @end, @letter, @topic_array]
     }.to_json(*a)
   end
 
@@ -85,8 +101,8 @@ class Library::HLB::CallNumberRange
   #
   # In both begin= and end=, we also rescue any parsing errors
   # and simply set the @illegal flag so we can use it later on.
-  def begin=(x)
-    @begin_raw = x
+  def begin_str=(x)
+    @begin_str = x
     return if x.nil?
     begin
       @letter = x.upcase.strip[0]
@@ -99,8 +115,8 @@ class Library::HLB::CallNumberRange
   end
 
   # Same as start. Set the illegal flag if we get an error
-  def end=(x)
-    @end_raw = x
+  def end_str=(x)
+    @end_str = x
     return if x.nil?
     letter = x.upcase.strip[0]
     $stderr.puts "Crossing letter-lines! #{self}" if @letter and @letter != letter
