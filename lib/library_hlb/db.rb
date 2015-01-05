@@ -12,10 +12,9 @@ class Library::HLB::DB
   attr_accessor :ranges
 
   def initialize
-    @ranges = {}
+    @ranges = Library::HLB::CallNumberRangeSet.new
     @topics = {}
     @all    = []
-    ('A'..'Z').each { |letter| @ranges[letter] = Library::HLB::CallNumberRangeSet.new }
   end
 
 
@@ -23,8 +22,7 @@ class Library::HLB::DB
   def topics(str)
     begin
       norm   = str.upcase.strip
-      letter = norm[0]
-      @ranges[letter].topics_for(str)
+      @ranges.topics_for(str)
      rescue => e
       $stderr.puts "Failure on #{str}: #{e}\n#{e.backtrace}"
       []
@@ -42,14 +40,14 @@ class Library::HLB::DB
     doc = Oga.parse_xml(xml)
     $stderr.puts "Building nodes"
     db.build_nodes(doc)
-    $stderr.puts "Pruning"
-    db.prune!
+    #$stderr.puts "Pruning"
+    #db.prune!
     db
   end
 
   def add_range(r)
     return nil if r.illegal?
-    @ranges[r.letter] << r
+    @ranges << r
     @topics[r.topic_array] ||= []
     @topics[r.topic_array] << r
     @all << r
@@ -61,28 +59,28 @@ class Library::HLB::DB
   #
   # Ranges must be sorted first via #sort_ranges!
 
-  def prune!
-    sort_ranges!
-    @topics.values.each do |list|
-      list.each_with_index do |inner, i|
-        list.each_with_index do |outer, o|
-          break if o >= i
-          if outer.surrounds(inner)
-            inner.redundant = true
-          end
-        end
-      end
-      # Delete from this topic list
-      list.delete_if { |x| x.redundant }
-    end
-    # Delete from all
-    @all.delete_if { |x| x.redundant }
-    # Delete from each set of lettered ranges
-    @ranges.values.each do |list|
-      list.delete_if { |x| x.redundant }
-    end
-    nil
-  end
+  #def prune!
+  #  sort_ranges!
+  #  @topics.values.each do |list|
+  #    list.each_with_index do |inner, i|
+  #      list.each_with_index do |outer, o|
+  #        break if o >= i
+  #        if outer.surrounds(inner)
+  #          inner.redundant = true
+  #        end
+  #      end
+  #    end
+  #    # Delete from this topic list
+  #    list.delete_if { |x| x.redundant }
+  #  end
+  #  # Delete from all
+  #  @all.delete_if { |x| x.redundant }
+  #  # Delete from each set of lettered ranges
+  #  @ranges.values.each do |list|
+  #    list.delete_if { |x| x.redundant }
+  #  end
+  #  nil
+  #end
 
 
   # Build up the list of nodes, adding them via #add_range

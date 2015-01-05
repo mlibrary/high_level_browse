@@ -38,7 +38,7 @@ end
 class Library::HLB::CallNumberRange
   include Comparable
 
-  attr_reader :begin, :end, :begin_str, :end_str, :letter
+  attr_reader :begin, :end, :begin_str, :end_str
 
   attr_accessor :topic_array, :redundant
 
@@ -62,12 +62,11 @@ class Library::HLB::CallNumberRange
   end
 
 
-  def reconstitute(begin_str, end_str, begin_num, end_num, letter, topic_array)
+  def reconstitute(begin_str, end_str, begin_num, end_num, topic_array)
     @begin_str = begin_str
     @end_str = end_str
     @begin = begin_num
     @end = end_num
-    @letter = letter
     @topic_array = topic_array
   end
 
@@ -86,7 +85,7 @@ class Library::HLB::CallNumberRange
   def to_json(*a)
     {
       'json_class' => self.class.name,
-      'data' => [@begin_str, @end_str, @begin, @end, @letter, @topic_array]
+      'data' => [@begin_str, @end_str, @begin, @end, @topic_array]
     }.to_json(*a)
   end
 
@@ -96,16 +95,12 @@ class Library::HLB::CallNumberRange
     cnr
   end
 
-  # We take advantage of the fact that no HLB ranges cross first-letter
-  # boundaries and set it here
-  #
-  # In both begin= and end=, we also rescue any parsing errors
+  # In both begin= and end=, we rescue any parsing errors
   # and simply set the @illegal flag so we can use it later on.
   def begin_str=(x)
     @begin_str = x
     return if x.nil?
     begin
-      @letter = x.upcase.strip[0]
       @begin = Library::HLB::BigNum.from_lc(x)
     rescue => e
       @illegal = true
@@ -118,8 +113,6 @@ class Library::HLB::CallNumberRange
   def end_str=(x)
     @end_str = x
     return if x.nil?
-    letter = x.upcase.strip[0]
-    $stderr.puts "Crossing letter-lines! #{self}" if @letter and @letter != letter
     begin
       @end = Library::HLB::BigNum.from_lc(x)
     rescue

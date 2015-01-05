@@ -15,11 +15,11 @@ module Library::HLB::BigNum
   # Turn a LC number -- just the letters, digits, and first cutter -- into
   # an integer.
   #
-  # We pack things in pretty tightly here, which is a bit slower but results
-  # in regular 64-bit Fixnums for everything but the ZZ range of call numbers
-  # This makes comparisons pretty fast.
+  # We pack things in pretty tightly here, and still can't get everything
+  # into a 64-bit integer; I'm anywhere from 3 to 7 bits over. Bigint comparisons
+  # are slower, but not as slow as dealing with the strings
   #
-  # We'll raise an IllegalLC argument if the lc isn't valid
+  # Raise an IllegalLC argument if the lc isn't valid
   def self.from_lc(x)
     lc = LCCallNumber.parse(x)
     raise Library::HLB::IllegalLC.new(x) unless lc.valid?

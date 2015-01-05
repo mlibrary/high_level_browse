@@ -24,7 +24,9 @@ module Library::HLB
 
   # Load from disk
   def self.load(dir='.')
-    DB.load(dir)
+    db = DB.load(dir)
+    db.ranges.set_max_endpoints
+    db
   end
 
 

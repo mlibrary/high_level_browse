@@ -59,7 +59,7 @@ class Library::HLB::IntervalTree < RedBlackTree
 
   def set_max_endpoints
     @root.set_max_endpoints
-    nil
+    self
   end
 
 end
