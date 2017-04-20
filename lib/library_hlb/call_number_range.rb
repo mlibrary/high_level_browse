@@ -47,11 +47,11 @@ class Library::HLB::CallNumberRange
 
 
   def reconstitute(start, stop, start_num, stop_num, letter, topic_array)
-    @begin = start
-    @end = stop
-    @begin_raw = start_raw
-    @end_raw = stop_raw
-    @letter = letter
+    @begin       = start
+    @end         = stop
+    @begin_raw   = begin_raw
+    @end_raw     = end_raw
+    @letter      = letter
     @topic_array = topic_array
   end
 
@@ -93,7 +93,7 @@ class Library::HLB::CallNumberRange
       @begin = Library::HLB::BigNum.from_lc(x)
     rescue => e
       @illegal = true
-      puts "Error: #{e}. Can't work with #{self}"
+      # puts "Error: #{e}. Can't work with #{self}" LOG LOG LOG
     end
 
   end

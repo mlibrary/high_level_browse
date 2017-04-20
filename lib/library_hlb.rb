@@ -8,12 +8,13 @@ require 'stringio'
 module Library::HLB
   class IllegalLC < ArgumentError;end
 
-  SOURCE_URL = 'http://www.lib.umich.edu/browse/categories/xml.php'
+  SOURCE_URL = 'https://www.lib.umich.edu/browse/categories/xml.php'
 
   # Fetch (and optionally store) a new version of the file
   def self.fetch
-    res = HTTPClient.get(SOURCE_URL,  {'Accept-Encoding' => 'gzip,deflate'})
+    res = HTTPClient.get(SOURCE_URL, :follow_redirect => false)
     raise "Could not fetch xml from '#{SOURCE_URL}' (status code #{res.status})" unless res.status == 200
+
     return DB.new_from_raw(res.content)
   end
 

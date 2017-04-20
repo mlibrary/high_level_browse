@@ -7,15 +7,15 @@ class RedBlackTree
     attr_accessor :right
     attr_accessor :parent
 
-    RED = :red
-    BLACK = :black
+    RED    = :red
+    BLACK  = :black
     COLORS = [RED, BLACK].freeze
 
     def initialize(key, color = RED)
       raise ArgumentError, "Bad value for color parameter" unless COLORS.include?(color)
       @color = color
-      @key = key
-      @left = @right = @parent = NilNode.instance
+      @key   = key
+      @left  = @right = @parent = NilNode.instance
     end
 
     def black?
@@ -36,21 +36,16 @@ class RedBlackTree
       def instance
         if @instance.nil?
           @instance = new
-
-          def instance
-            return @instance
-          end
         end
-
         return @instance
       end
     end
 
     def initialize
-      self.color = BLACK
-      self.key = 0
-      self.left = nil
-      self.right = nil
+      self.color  = BLACK
+      self.key    = 0
+      self.left   = nil
+      self.right  = nil
       self.parent = nil
     end
 
@@ -81,32 +76,32 @@ class RedBlackTree
       if x.parent == x.parent.parent.left
         y = x.parent.parent.right
         if !y.nil? && y.color == Node::RED
-          x.parent.color = Node::BLACK
-          y.color = Node::BLACK
+          x.parent.color        = Node::BLACK
+          y.color               = Node::BLACK
           x.parent.parent.color = Node::RED
-          x = x.parent.parent
+          x                     = x.parent.parent
         else
           if x == x.parent.right
             x = x.parent
             left_rotate(x)
           end
-          x.parent.color = Node::BLACK
+          x.parent.color        = Node::BLACK
           x.parent.parent.color = Node::RED
           right_rotate(x.parent.parent)
         end
       else
         y = x.parent.parent.left
         if !y.nil? && y.color == Node::RED
-          x.parent.color = Node::BLACK
-          y.color = Node::BLACK
+          x.parent.color        = Node::BLACK
+          y.color               = Node::BLACK
           x.parent.parent.color = Node::RED
-          x = x.parent.parent
+          x                     = x.parent.parent
         else
           if x == x.parent.left
             x = x.parent
             right_rotate(x)
           end
-          x.parent.color = Node::BLACK
+          x.parent.color        = Node::BLACK
           x.parent.parent.color = Node::RED
           left_rotate(x.parent.parent)
         end
@@ -118,8 +113,8 @@ class RedBlackTree
   alias << insert
 
   def delete(z)
-    y = (z.left.nil? || z.right.nil?) ? z : successor(z)
-    x = y.left.nil? ? y.right : y.left
+    y        = (z.left.nil? || z.right.nil?) ? z : successor(z)
+    x        = y.left.nil? ? y.right : y.left
     x.parent = y.parent
 
     if y.parent.nil?
@@ -214,20 +209,20 @@ class RedBlackTree
   def black_height(x = root)
     height = 0
     while !x.nil?
-      x = x.left
+      x      = x.left
       height +=1 if x.nil? || x.black?
     end
     return height
   end
 
-private
+  private
 
   def left_rotate(x)
     raise "x.right is nil!" if x.right.nil?
-    y = x.right
-    x.right = y.left
+    y             = x.right
+    x.right       = y.left
     y.left.parent = x if !y.left.nil?
-    y.parent = x.parent
+    y.parent      = x.parent
     if x.parent.nil?
       self.root = y
     else
@@ -237,16 +232,16 @@ private
         x.parent.right = y
       end
     end
-    y.left = x
+    y.left   = x
     x.parent = y
   end
 
   def right_rotate(x)
     raise "x.left is nil!" if x.left.nil?
-    y = x.left
-    x.left = y.right
+    y              = x.left
+    x.left         = y.right
     y.right.parent = x if !y.right.nil?
-    y.parent = x.parent
+    y.parent       = x.parent
     if x.parent.nil?
       self.root = y
     else
@@ -256,7 +251,7 @@ private
         x.parent.right = y
       end
     end
-    y.right = x
+    y.right  = x
     x.parent = y
   end
 
@@ -281,48 +276,48 @@ private
       if x == x.parent.left
         w = x.parent.right
         if w.color == Node::RED
-          w.color = Node::BLACK
+          w.color        = Node::BLACK
           x.parent.color = Node::RED
           left_rotate(x.parent)
           w = x.parent.right
         end
         if w.left.color == Node::BLACK && w.right.color == Node::BLACK
           w.color = Node::RED
-          x = x.parent
+          x       = x.parent
         else
           if w.right.color == Node::BLACK
             w.left.color = Node::BLACK
-            w.color = Node::RED
+            w.color      = Node::RED
             right_rotate(w)
             w = x.parent.right
           end
-          w.color = x.parent.color
+          w.color        = x.parent.color
           x.parent.color = Node::BLACK
-          w.right.color = Node::BLACK
+          w.right.color  = Node::BLACK
           left_rotate(x.parent)
           x = root
         end
       else
         w = x.parent.left
         if w.color == Node::RED
-          w.color = Node::BLACK
+          w.color        = Node::BLACK
           x.parent.color = Node::RED
           right_rotate(x.parent)
           w = x.parent.left
         end
         if w.right.color == Node::BLACK && w.left.color == Node::BLACK
           w.color = Node::RED
-          x = x.parent
+          x       = x.parent
         else
           if w.left.color == Node::BLACK
             w.right.color = Node::BLACK
-            w.color = Node::RED
+            w.color       = Node::RED
             left_rotate(w)
             w = x.parent.left
           end
-          w.color = x.parent.color
+          w.color        = x.parent.color
           x.parent.color = Node::BLACK
-          w.left.color = Node::BLACK
+          w.left.color   = Node::BLACK
           right_rotate(x.parent)
           x = root
         end

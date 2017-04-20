@@ -25,8 +25,7 @@ class Library::HLB::DB
       norm   = str.upcase.strip
       letter = norm[0]
       @ranges[letter].topics_for(str)
-     rescue => e
-      $stderr.puts "#{e}"
+    rescue => e # probably malformed or a well-formed dewey, which we don't deal with yet
       []
     end
   end
@@ -45,6 +44,13 @@ class Library::HLB::DB
     $stderr.puts "Pruning"
     db.prune!
     db
+  end
+
+  def freeze
+    @ranges.freeze
+    @topics.freeze
+    @all.freeze
+    self
   end
 
   def add_range(r)
@@ -121,11 +127,14 @@ class Library::HLB::DB
   # Sort the ranges by start
   def sort_ranges!
     @ranges.values.each do |arr|
-      arr.sort! { |a, b| a.begin_num <=> b.begin_num }
+      arr.sort!
+      # arr.sort! { |a, b| a.begin_num <=> b.begin_num }
     end
     @topics.values.each do |arr|
-      arr.sort! { |a, b| a.begin_num <=> b.begin_num }
+      arr.sort!
+      # arr.sort! { |a, b| a.begin_num <=> b.begin_num }
     end
+
   end
 
 

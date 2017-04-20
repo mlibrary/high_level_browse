@@ -4,14 +4,13 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'library_hlb/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "library_hlb"
-  spec.version       = LibraryHlb::VERSION
-  spec.authors       = ["Bill Dueber"]
-  spec.email         = ["bill@dueber.com"]
-  spec.summary       = %q{TODO: Write a short summary. Required.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
-  spec.homepage      = ""
-  spec.license       = "MIT"
+  spec.name     = "library_hlb"
+  spec.version  = Library::HLB::VERSION
+  spec.authors  = ["Bill Dueber"]
+  spec.email    = ["bill@dueber.com"]
+  spec.summary  = %q{Map LC call numbers to academic categories.}
+  spec.homepage = ""
+  spec.license  = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
@@ -20,6 +19,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'httpclient', "~> 2.5"
   spec.add_dependency 'oga', '>=0.2'
+  spec.add_dependency 'lc_callnumber'
 
   spec.add_development_dependency "bundler", "~> 1.6"
   spec.add_development_dependency "rake"
