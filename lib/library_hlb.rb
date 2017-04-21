@@ -8,7 +8,7 @@ require 'stringio'
 module Library::HLB
   class IllegalLC < ArgumentError;end
 
-  SOURCE_URL = 'https://www.lib.umich.edu/browse/categories/xml.php'
+  SOURCE_URL = ENV['HLB_XML_ENDPOINT'] || 'https://www.lib.umich.edu/browse/categories/xml.php'
 
   # Fetch (and optionally store) a new version of the file
   def self.fetch
