@@ -15,8 +15,10 @@ def silence_warnings(&block)
   result
 end
 
+# minitest has a circular require warning, which
+# drives me crazy. Suppress it.
 silence_warnings do
-  require 'library_hlb'
+  require 'high_level_browse'
 end
 
 require 'fileutils'
@@ -31,7 +33,7 @@ end
 def usage(msg = nil)
   puts
   putsmsg(msg) if msg
-  puts "fetch_new_hlb -- get a new copy of the HLB ready for use by library_hlb"
+  puts "fetch_new_hlb -- get a new copy of the HLB ready for use by high_level_browse"
   puts "and stick it in the given directory"
   puts
   puts "   fetch_new_hlb <dir>"
@@ -50,7 +52,7 @@ Dir.exist? dir or usage "#{dir} is not a directory"
 File.writable? dir or usage "#{dir} is not writable"
 
 begin
-  db = Library::HLB.fetch
+  db = HighLevelBrowse.fetch
   db.save(dir)
 rescue => e
   puts "============================="
