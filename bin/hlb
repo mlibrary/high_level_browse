@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+
+# Hmmm. How to pass along the location? Stick one in /tmp
+# and see if it exists?
+
+self_load_path = File.expand_path("../lib", File.dirname(__FILE__))
+unless $LOAD_PATH.include? self_load_path
+  $LOAD_PATH << self_load_path
+end
+
+require 'high_level_browse'
+
+require 'fileutils'
+
+
+unless File.exist?('/tmp/hlb.json.gz')
+  HighLevelBrowse.fetch_and_save('/tmp')
+end
+
+h = HighLevelBrowse.load('/tmp')
+topics = h[ARGV[0]]
+
+if topics.empty?
+  puts "\nNo categories found\n\n"
+  else
+    puts "\n" + topics.map{|x| x.join(' | ')}.join("\n") + "\n\n"
+end

@@ -3,7 +3,6 @@ require 'high_level_browse/call_number_range'
 require 'zlib'
 require 'json'
 require 'high_level_browse/errors'
-require 'high_level_browse/bignum'
 
 class HighLevelBrowse::DB
 

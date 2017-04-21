@@ -1,5 +1,3 @@
-require 'lc_callnumber'
-require 'Set'
 require 'lcsort'
 
 class HighLevelBrowse::CallNumberRangeSet < Array
