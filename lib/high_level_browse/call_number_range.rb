@@ -1,13 +1,13 @@
 require 'lc_callnumber'
-require 'high_level_browse/bignum'
 require 'Set'
+require 'lcsort'
 
 class HighLevelBrowse::CallNumberRangeSet < Array
   def topics_for(str)
-    big    = HighLevelBrowse::BigNum.from_lc(str)
+    normalized = Lcsort.normalize(str)
     topics = Set.new
     self.each do |cnr|
-      topics << cnr.topic_array if cnr.contains_int(big)
+      topics << cnr.topic_array if cnr.contains(normalized)
     end
     topics
   end
@@ -90,7 +90,7 @@ class HighLevelBrowse::CallNumberRange
     return if x.nil?
     begin
       @letter = x.upcase.strip[0]
-      @begin = HighLevelBrowse::BigNum.from_lc(x)
+      @begin = Lcsort.normalize(x)
     rescue => e
       @illegal = true
       # puts "Error: #{e}. Can't work with #{self}" LOG LOG LOG
@@ -105,7 +105,7 @@ class HighLevelBrowse::CallNumberRange
     letter = x.upcase.strip[0]
     $stderr.puts "Crossing letter-lines! #{self}" if @letter and @letter != letter
     begin
-      @end = HighLevelBrowse::BigNum.from_lc(x)
+      @end = Lcsort.normalize(x)
     rescue
       @illegal = true
     end
@@ -120,12 +120,13 @@ class HighLevelBrowse::CallNumberRange
     @begin <= other.begin and @end >= other.end
   end
 
-  def contains_int(int)
-    @begin <= int and @end >= int
+  def contains(x)
+    @begin <= x and @end >= x
   end
 
-  alias_method :cover?,  :contains_int
-  alias_method :member?, :contains_int
+
+  alias_method :cover?,  :contains
+  alias_method :member?, :contains
 
   def self.new_from_oga_node(n, topic_array)
     self.new(n.get(:start), n.get(:end), topic_array)

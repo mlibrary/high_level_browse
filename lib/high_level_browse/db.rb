@@ -24,11 +24,14 @@ class HighLevelBrowse::DB
     begin
       norm   = str.upcase.strip
       letter = norm[0]
-      @ranges[letter].topics_for(str)
+      @ranges[letter].topics_for(norm)
     rescue => e # probably malformed or a well-formed dewey, which we don't deal with yet
       []
     end
   end
+
+  alias_method :[], :topics
+
 
 
   # Use Oga to parse out the raw XML and create a set of
@@ -41,8 +44,8 @@ class HighLevelBrowse::DB
     doc = Oga.parse_xml(xml)
     $stderr.puts "Building nodes"
     db.build_nodes(doc)
-    $stderr.puts "Pruning"
-    db.prune!
+    # $stderr.puts "Pruning"
+    # db.prune!
     db
   end
 
@@ -127,14 +130,11 @@ class HighLevelBrowse::DB
   # Sort the ranges by start
   def sort_ranges!
     @ranges.values.each do |arr|
-      arr.sort!
-      # arr.sort! { |a, b| a.begin_num <=> b.begin_num }
+      arr.sort! { |a, b| a <=> b }
     end
     @topics.values.each do |arr|
-      arr.sort!
-      # arr.sort! { |a, b| a.begin_num <=> b.begin_num }
+      arr.sort! { |a, b| a <=> b }
     end
-
   end
 
 
