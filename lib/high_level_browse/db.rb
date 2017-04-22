@@ -107,14 +107,17 @@ class HighLevelBrowse::DB
   end
 
   # Save to disk
-  def save(dir = '.')
+  # @param [String] dir The directory where the hlb.json.gz file will be saved
+  # @return [HighLevelBrowse::DB] The loaded database
+  def save(dir:)
     Zlib::GzipWriter.open(File.join(dir, FILENAME)) do |out|
       out.puts JSON.fast_generate(@all)
     end
   end
 
   # Load from disk
-  def self.load(dir = '.')
+  # @param [String] dir The directory where the hlb.json.gz file is located
+  def self.load(dir:)
     db = self.new
     Zlib::GzipReader.open(File.join(dir, FILENAME)) do |infile|
       JSON.load(infile.read).each do |r|

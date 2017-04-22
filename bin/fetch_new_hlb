@@ -53,7 +53,7 @@ File.writable? dir or usage "#{dir} is not writable"
 
 begin
   db = HighLevelBrowse.fetch
-  db.save(dir)
+  db.save(dir: dir)
 rescue => e
   puts "============================="
   puts "ERROR FETCHING HLB SOURCE"
