@@ -3,6 +3,11 @@ require 'high_level_browse/call_number_range'
 require 'zlib'
 require 'json'
 require 'high_level_browse/errors'
+require 'logger'
+#use dry-inject for this!!!
+unless defined? LOGGER
+  LOGGER = Logger.new
+end
 
 class HighLevelBrowse::DB
 
@@ -19,9 +24,17 @@ class HighLevelBrowse::DB
 
 
   # Get the topic arrays associated with this callnumber
-  def topics(str)
+  # of the form:
+  #   [
+  #     [toplevel, secondlevel],
+  #     [toplevel, secondlevel, thirdlevel],
+  #      ...
+  #   ]
+  # @param [String] raw_callnumber_string
+  # @return [Array<Array>] A (possibly empty) array of arrays of topics
+  def topics(raw_callnumber_string)
     begin
-      norm   = str.upcase.strip
+      norm   = raw_callnumber_string.upcase.strip
       letter = norm[0]
       @ranges[letter].topics_for(norm)
     rescue => e # probably malformed or a well-formed dewey, which we don't deal with yet
@@ -43,8 +56,8 @@ class HighLevelBrowse::DB
     doc = Oga.parse_xml(xml)
     $stderr.puts "Building nodes"
     db.build_nodes(doc)
-    # $stderr.puts "Pruning"
-    # db.prune!
+    $stderr.puts "Pruning"
+    db.prune!
     db
   end
 

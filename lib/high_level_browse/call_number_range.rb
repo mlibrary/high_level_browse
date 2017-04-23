@@ -1,4 +1,9 @@
 require 'lcsort'
+require 'logger'
+#use dry-inject for this!!!
+unless defined? LOGGER
+  LOGGER = Logger.new(STDIN)
+end
 
 class HighLevelBrowse::CallNumberRangeSet < Array
   def topics_for(str)
@@ -91,6 +96,7 @@ class HighLevelBrowse::CallNumberRange
       @begin = Lcsort.normalize(x)
     rescue => e
       @illegal = true
+      LOGGER.warn "#{e} doesn't lc-ify"
       # puts "Error: #{e}. Can't work with #{self}" LOG LOG LOG
     end
 
