@@ -6,7 +6,7 @@ require 'high_level_browse/errors'
 require 'logger'
 #use dry-inject for this!!!
 unless defined? LOGGER
-  LOGGER = Logger.new
+  LOGGER = Logger.new(STDERR)
 end
 
 class HighLevelBrowse::DB
@@ -52,11 +52,11 @@ class HighLevelBrowse::DB
 
   def self.new_from_raw(xml)
     db = self.new
-    $stderr.puts "Parsing XML"
+    LOGGER.info "Parsing XML"
     doc = Oga.parse_xml(xml)
-    $stderr.puts "Building nodes"
+    LOGGER.info "Building nodes"
     db.build_nodes(doc)
-    $stderr.puts "Pruning"
+    LOGGER.info "Pruning"
     db.prune!
     db
   end
@@ -74,6 +74,7 @@ class HighLevelBrowse::DB
     @topics[r.topic_array] ||= []
     @topics[r.topic_array] << r
     @all << r
+    self
   end
 
   # Remove any ranges that are subsumed by other ranges. If two ranges

@@ -15,7 +15,6 @@ module HighLevelBrowse
   def self.fetch
     res = HTTPClient.get(SOURCE_URL, :follow_redirect => false)
     raise "Could not fetch xml from '#{SOURCE_URL}' (status code #{res.status})" unless res.status == 200
-
     return DB.new_from_raw(res.content)
   end
 
@@ -32,6 +31,4 @@ module HighLevelBrowse
   def self.load(dir:)
     DB.load(dir)
   end
-
-
 end
