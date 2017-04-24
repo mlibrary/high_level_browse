@@ -29,6 +29,6 @@ module HighLevelBrowse
   # @param [String] dir The directory where the hlb.json.gz file is located
   # @return [HighLevelBrowse::DB] The loaded database
   def self.load(dir:)
-    DB.load(dir)
+    DB.load(dir: dir)
   end
 end

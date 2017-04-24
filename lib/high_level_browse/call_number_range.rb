@@ -31,6 +31,7 @@ class HighLevelBrowse::CallNumberRange
   SPACE_OR_PUNCT = /[\s\p{Punct}]/
 
   def self.strip_down_ends(str)
+    str ||= ''
     str.gsub /\A#{SPACE_OR_PUNCT}*(.*?)#{SPACE_OR_PUNCT}*\Z/, '\1'
   end
 
