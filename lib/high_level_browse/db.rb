@@ -145,10 +145,10 @@ class HighLevelBrowse::DB
   # Sort the ranges by start
   def sort_ranges!
     @ranges.values.each do |arr|
-      arr.sort! { |a, b| a <=> b }
+        arr.sort!
     end
     @topics.values.each do |arr|
-      arr.sort! { |a, b| a <=> b }
+      arr.sort!
     end
   end
 

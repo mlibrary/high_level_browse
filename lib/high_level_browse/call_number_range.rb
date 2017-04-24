@@ -14,7 +14,6 @@ class HighLevelBrowse::CallNumberRangeSet < Array
     end
     topics
   end
-
 end
 
 
@@ -90,13 +89,17 @@ class HighLevelBrowse::CallNumberRange
   # and simply set the @illegal flag so we can use it later on.
   def begin=(x)
     @begin_raw = x
-    return if x.nil?
     begin
       @letter = x.upcase.strip[0]
+      if x.nil? or !(/[A-Z]/.match(@letter))
+        @illegal = true
+        raise "Doesn't start with a letter"
+      end
       @begin = Lcsort.normalize(x)
     rescue => e
       @illegal = true
       LOGGER.warn "#{e} doesn't lc-ify"
+      nil
       # puts "Error: #{e}. Can't work with #{self}" LOG LOG LOG
     end
 
@@ -105,13 +108,21 @@ class HighLevelBrowse::CallNumberRange
   # Same as start. Set the illegal flag if we get an error
   def end=(x)
     @end_raw = x
-    return if x.nil?
     letter = x.upcase.strip[0]
-    $stderr.puts "Crossing letter-lines! #{self}" if @letter and @letter != letter
+   if @letter and @letter != letter
+     @illegal = true
+     LOGGER.warn "Skipping #{@begin_raw} - #{@end_raw}; crosses letter boundaries"
+     return nil
+   end
     begin
+      if x.nil? or !(/[A-Z]/.match(@letter))
+        @illegal = true
+        raise "Doesn't start with a letter"
+      end
       @end = Lcsort.normalize(x)
     rescue
       @illegal = true
+      nil
     end
   end
 
