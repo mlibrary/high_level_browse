@@ -22,7 +22,7 @@ module HighLevelBrowse
   # Fetch and save to the specified directory
   # @param [String] dir The directory where the hlb.json.gz file will end up
   def self.fetch_and_save(dir:)
-    self.fetch.save(dir)
+    self.fetch.save(dir: dir)
   end
 
   # Load from disk

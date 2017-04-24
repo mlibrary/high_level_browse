@@ -56,7 +56,7 @@ class HighLevelBrowse::CallNumberRange
   end
 
 
-  def reconstitute(start, stop, start_num, stop_num, letter, topic_array)
+  def reconstitute(start, stop, begin_raw, end_raw, letter, topic_array)
     @begin       = start
     @end         = stop
     @begin_raw   = begin_raw
@@ -85,7 +85,7 @@ class HighLevelBrowse::CallNumberRange
   end
 
   def self.json_create(h)
-    cnr = self.new
+    cnr = self.allocate
     cnr.reconstitute(*(h['data']))
     cnr
   end
