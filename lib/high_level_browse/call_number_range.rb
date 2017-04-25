@@ -26,6 +26,10 @@ class HighLevelBrowse::CallNumberRange
 
   attr_reader :begin, :end, :begin_raw, :end_raw, :letter
 
+  # Add min/max to make it work with range_tree
+  alias_method :min, :begin
+  alias_method :max, :end
+
   attr_accessor :topic_array, :redundant
 
   SPACE_OR_PUNCT = /[\s\p{Punct}]/
