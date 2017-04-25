@@ -1,19 +1,20 @@
 require 'lcsort'
+require 'high_level_browse/range_tree'
+
 require 'logger'
 #use dry-inject for this!!!
 unless defined? LOGGER
   LOGGER = Logger.new(STDERR)
 end
 
-class HighLevelBrowse::CallNumberRangeSet < Array
+class HighLevelBrowse::CallNumberRangeSet < HighLevelBrowse::RangeTree
+
+
   def topics_for(str)
     normalized = Lcsort.normalize(HighLevelBrowse::CallNumberRange.strip_down_ends(str))
-    topics     = Set.new
-    self.each do |cnr|
-      topics << cnr.topic_array if cnr.contains(normalized)
-    end
-    topics
+    self.search(normalized).map(&:topic_array).uniq
   end
+
 end
 
 
@@ -24,7 +25,7 @@ end
 class HighLevelBrowse::CallNumberRange
   include Comparable
 
-  attr_reader :begin, :end, :begin_raw, :end_raw, :letter
+  attr_reader :begin, :end, :begin_raw, :end_raw
 
   # Add min/max to make it work with range_tree
   alias_method :min, :begin
@@ -60,12 +61,11 @@ class HighLevelBrowse::CallNumberRange
   end
 
 
-  def reconstitute(start, stop, begin_raw, end_raw, letter, topic_array)
+  def reconstitute(start, stop, begin_raw, end_raw, topic_array)
     @begin       = start
     @end         = stop
     @begin_raw   = begin_raw
     @end_raw     = end_raw
-    @letter      = letter
     @topic_array = topic_array
   end
 
@@ -84,7 +84,7 @@ class HighLevelBrowse::CallNumberRange
   def to_json(*a)
     {
       'json_class' => self.class.name,
-      'data' => [@begin, @end, @begin_raw, @end_raw, @letter, @topic_array]
+      'data' => [@begin, @end, @begin_raw, @end_raw, @topic_array]
     }.to_json(*a)
   end
 
@@ -94,9 +94,7 @@ class HighLevelBrowse::CallNumberRange
     cnr
   end
 
-  # We take advantage of the fact that no HLB ranges cross first-letter
-  # boundaries and set it here
-  #
+
   # In both begin= and end=, we also rescue any parsing errors
   # and simply set the @illegal flag so we can use it later on.
   def begin=(x)
@@ -107,7 +105,6 @@ class HighLevelBrowse::CallNumberRange
       @illegal = true
       nil
     else
-      @letter = possible_begin[0]
       @begin  = possible_begin
     end
   end
@@ -121,8 +118,7 @@ class HighLevelBrowse::CallNumberRange
       @illegal = true
       nil
     else
-      end_letter = possible_end[0]
-      @end       = possible_end
+      @end       = possible_end + '~' # add a tilde to make it a true endpoint
     end
   end
 

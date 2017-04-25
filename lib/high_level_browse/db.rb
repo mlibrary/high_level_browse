@@ -16,10 +16,8 @@ class HighLevelBrowse::DB
   attr_accessor :ranges
 
   def initialize
-    @ranges = {}
-    @topics = {}
+    @ranges = nil
     @all    = []
-    ('A'..'Z').each { |letter| @ranges[letter] = HighLevelBrowse::CallNumberRangeSet.new }
   end
 
 
@@ -33,17 +31,10 @@ class HighLevelBrowse::DB
   # @param [String] raw_callnumber_string
   # @return [Array<Array>] A (possibly empty) array of arrays of topics
   def topics(raw_callnumber_string)
-    begin
-      norm   = raw_callnumber_string.upcase.strip
-      letter = norm[0]
-      @ranges[letter].topics_for(norm)
-    rescue => e # probably malformed or a well-formed dewey, which we don't deal with yet
-      []
-    end
+    @ranges.topics_for(raw_callnumber_string)
   end
 
   alias_method :[], :topics
-
 
 
   # Use Oga to parse out the raw XML and create a set of
@@ -56,54 +47,30 @@ class HighLevelBrowse::DB
     doc = Oga.parse_xml(xml)
     LOGGER.info "Building nodes"
     db.build_nodes(doc)
-    LOGGER.info "Pruning"
-    db.prune!
+    LOGGER.info "Treeifying"
+    db.treeify!
+    db.freeze
     db
+  end
+
+  def treeify!
+    @ranges = HighLevelBrowse::CallNumberRangeSet.new(@all)
+    self
   end
 
   def freeze
     @ranges.freeze
-    @topics.freeze
     @all.freeze
     self
   end
 
   def add_range(r)
-    return nil if r.illegal?
-    @ranges[r.letter] << r
-    @topics[r.topic_array] ||= []
-    @topics[r.topic_array] << r
-    @all << r
+    if r.min.nil? or r.max.nil?
+      LOGGER.warn "Bad range #{r}"
+    else
+      @all << r
+    end
     self
-  end
-
-  # Remove any ranges that are subsumed by other ranges. If two ranges
-  # have the same topic_array, and one lies entirely within the other,
-  # then the inner one may be removed.
-  #
-  # Ranges must be sorted first via #sort_ranges!
-
-  def prune!
-    sort_ranges!
-    @topics.values.each do |list|
-      list.each_with_index do |inner, i|
-        list.each_with_index do |outer, o|
-          break if o >= i
-          if outer.surrounds(inner)
-            inner.redundant = true
-          end
-        end
-      end
-      # Delete from this topic list
-      list.delete_if { |x| x.redundant }
-    end
-    # Delete from all
-    @all.delete_if { |x| x.redundant }
-    # Delete from each set of lettered ranges
-    @ranges.values.each do |list|
-      list.delete_if { |x| x.redundant }
-    end
-    nil
   end
 
 
@@ -138,6 +105,7 @@ class HighLevelBrowse::DB
         db.add_range(r)
       end
     end
+    db.treeify!
     db
   end
 
@@ -146,7 +114,7 @@ class HighLevelBrowse::DB
   # Sort the ranges by start
   def sort_ranges!
     @ranges.values.each do |arr|
-        arr.sort!
+      arr.sort!
     end
     @topics.values.each do |arr|
       arr.sort!
