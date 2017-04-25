@@ -25,7 +25,7 @@ module HighLevelBrowse
     self.fetch.save(dir: dir)
   end
 
-  # Load from disk
+  # Load from disk file in the given directory
   # @param [String] dir The directory where the hlb.json.gz file is located
   # @return [HighLevelBrowse::DB] The loaded database
   def self.load(dir:)

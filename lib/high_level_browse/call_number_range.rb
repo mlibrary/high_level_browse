@@ -7,9 +7,8 @@ unless defined? LOGGER
   LOGGER = Logger.new(STDERR)
 end
 
+# A set of CallNumberRanges that can be queried with #topics_for
 class HighLevelBrowse::CallNumberRangeSet < HighLevelBrowse::RangeTree
-
-
   def topics_for(str)
     normalized = Lcsort.normalize(HighLevelBrowse::CallNumberRange.strip_down_ends(str))
     self.search(normalized).map(&:topic_array).uniq
@@ -17,11 +16,8 @@ class HighLevelBrowse::CallNumberRangeSet < HighLevelBrowse::RangeTree
 
 end
 
-
-# A callnumber-range turns callnumbers into integers (or bigints
-# for ZZ* callnumbers). It responds much as a Range does (#begin,
-# #end, #covers)
-
+# A representation of a call number range which can
+# be queried and normalizes its input
 class HighLevelBrowse::CallNumberRange
   include Comparable
 

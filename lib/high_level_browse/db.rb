@@ -9,29 +9,31 @@ unless defined? LOGGER
   LOGGER = Logger.new(STDERR)
 end
 
+
 class HighLevelBrowse::DB
 
+  # Hardcode the name of the file, because it makes life easier.
+  # Multiple files can be put in different directories
+  # if need be
   FILENAME = 'hlb.json.gz'
 
-  attr_accessor :ranges
-
   def initialize
-    @ranges = nil
+    @ranges = nil # will be the tree structure
     @all    = []
   end
 
 
   # Get the topic arrays associated with this callnumber
-  # of the form:
+  # or set of callnumbers of the form:
   #   [
   #     [toplevel, secondlevel],
   #     [toplevel, secondlevel, thirdlevel],
   #      ...
   #   ]
-  # @param [String] raw_callnumber_string
-  # @return [Array<Array>] A (possibly empty) array of arrays of topics
-  def topics(raw_callnumber_string)
-    @ranges.topics_for(raw_callnumber_string)
+  # @param [String, Array<String>] raw_callnumber_string(s)
+  # @return [Array<Array<String>>] A (possibly empty) array of arrays of topics
+  def topics(*raw_callnumber_strings)
+    raw_callnumber_strings.map{|cn| @ranges.topics_for(cn)}.flatten(1).uniq
   end
 
   alias_method :[], :topics
@@ -39,53 +41,30 @@ class HighLevelBrowse::DB
 
   # Use Oga to parse out the raw XML and create a set of
   # HLB::CallNumberRange objects, ready for
-  # sorting, de-duplication, and saving
-
+  # sorting, de-duplication, turning into a set,
+  # and/or saving
+  #
+  # This is all side effects, so be warned
+  # @param [String] xml Valid HLB xml
+  # @return [HighLevelBrowse::DB] the DB, ready for querying
   def self.new_from_raw(xml)
-    db = self.new
-    LOGGER.info "Parsing XML"
+    self.new.replace_with_xml(xml)
+  end
+
+  # Throw away whatever (if anything) is in this
+  # object and replace fully with the XML passed
+  # This is all side effects, so be warned
+  # @param [String] xml Valid HLB xml
+  # @return [HighLevelBrowse::DB] the DB, ready for querying
+  def replace_with_xml(xml)
+    @all = []
     doc = Oga.parse_xml(xml)
-    LOGGER.info "Building nodes"
-    db.build_nodes(doc)
-    LOGGER.info "Treeifying"
-    db.treeify!
-    db.freeze
-    db
-  end
-
-  def treeify!
-    @ranges = HighLevelBrowse::CallNumberRangeSet.new(@all)
+    build_nodes(doc)
+    treeify!
+    freeze
     self
   end
 
-  def freeze
-    @ranges.freeze
-    @all.freeze
-    self
-  end
-
-  def add_range(r)
-    if r.min.nil? or r.max.nil?
-      LOGGER.warn "Bad range #{r}"
-    else
-      @all << r
-    end
-    self
-  end
-
-
-  # Build up the list of nodes, adding them via #add_range
-  def build_nodes(node, path=['/hlb/subject', 'topic', 'sub-topic'], topic_array=[])
-    xp = path.shift
-    return if xp.nil?
-    node.xpath(xp).each do |n|
-      ta = topic_array.dup.push n.get(:name)
-      n.xpath('call-numbers').each do |cn|
-        self.add_range HighLevelBrowse::CallNumberRange.new_from_oga_node(cn, ta)
-      end
-      build_nodes(n, path.dup, ta)
-    end
-  end
 
   # Save to disk
   # @param [String] dir The directory where the hlb.json.gz file will be saved
@@ -109,15 +88,45 @@ class HighLevelBrowse::DB
     db
   end
 
+  # Take the ranges in @all and turn them into an efficient
+  # data structure in @ranges
+  # @return [self]
+  def treeify!
+    @ranges = HighLevelBrowse::CallNumberRangeSet.new(@all)
+    self
+  end
+
+
+  def freeze
+    @ranges.freeze
+    @all.freeze
+    self
+  end
+
+  # Add a call number range, prior to treeification
+  # @param [HighLevelBrowse::CallNumberRange] r
+  # @return [self]
+  def add_range(r)
+    if r.min.nil? or r.max.nil?
+      LOGGER.warn "Bad range #{r}"
+    else
+      @all << r
+    end
+    self
+  end
+
   private
 
-  # Sort the ranges by start
-  def sort_ranges!
-    @ranges.values.each do |arr|
-      arr.sort!
-    end
-    @topics.values.each do |arr|
-      arr.sort!
+  # Build up the list of nodes, adding them via #add_range
+  def build_nodes(node, path=['/hlb/subject', 'topic', 'sub-topic'], topic_array=[])
+    xp = path.shift
+    return if xp.nil?
+    node.xpath(xp).each do |n|
+      ta = topic_array.dup.push n.get(:name)
+      n.xpath('call-numbers').each do |cn|
+        self.add_range HighLevelBrowse::CallNumberRange.new_from_oga_node(cn, ta)
+      end
+      build_nodes(n, path.dup, ta)
     end
   end
 
