@@ -41,7 +41,7 @@ class HighLevelBrowse::CallNumberRange
   end
 
 
-  def initialize(start=nil, stop=nil, topic_array = [])
+  def initialize(start:, stop:, topic_array:)
     @illegal     = false
     @redundant   = false
     self.begin   = self.class.strip_down_ends(start)
