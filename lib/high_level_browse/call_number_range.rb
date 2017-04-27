@@ -1,11 +1,6 @@
 require 'lcsort'
 require 'high_level_browse/range_tree'
 
-require 'logger'
-#use dry-inject for this!!!
-unless defined? LOGGER
-  LOGGER = Logger.new(STDERR)
-end
 
 # An efficient set of CallNumberRanges from which to get topics
 class HighLevelBrowse::CallNumberRangeSet < HighLevelBrowse::RangeTree
@@ -27,7 +22,7 @@ end
 class HighLevelBrowse::CallNumberRange
   include Comparable
 
-  attr_reader :begin, :end, :begin_raw, :end_raw
+  attr_reader :begin, :end, :begin_raw, :end_raw, :firstletter
 
   # Add min/max to make it work with range_tree
   alias_method :min, :begin
@@ -50,6 +45,7 @@ class HighLevelBrowse::CallNumberRange
     self.begin   = self.class.strip_down_ends(start)
     self.end     = self.class.strip_down_ends(stop)
     @topic_array = topic_array
+    @firstletter = self.begin[0] unless @illegal
   end
 
 
@@ -91,8 +87,8 @@ class HighLevelBrowse::CallNumberRange
   # JSON roundtrip
   def to_json(*a)
     {
-      'json_class' => self.class.name,
-      'data' => [@begin, @end, @begin_raw, @end_raw, @topic_array]
+        'json_class' => self.class.name,
+        'data'       => [@begin, @end, @begin_raw, @end_raw, @topic_array]
     }.to_json(*a)
   end
 
@@ -109,12 +105,11 @@ class HighLevelBrowse::CallNumberRange
   def begin=(x)
     @begin_raw     = x
     possible_begin = Lcsort.normalize(x)
-    if possible_begin.nil?
-      LOGGER.warn "Begin value #{x} doesn't lc-ify"
+    if possible_begin.nil? # didn't normalize
       @illegal = true
       nil
     else
-      @begin  = possible_begin
+      @begin = possible_begin
     end
   end
 
@@ -122,12 +117,11 @@ class HighLevelBrowse::CallNumberRange
   def end=(x)
     @end_raw     = x
     possible_end = Lcsort.normalize(x)
-    if possible_end.nil?
-      LOGGER.warn "End value #{x} doesn't lc-ify"
+    if possible_end.nil? # didn't normalize
       @illegal = true
       nil
     else
-      @end       = possible_end + '~' # add a tilde to make it a true endpoint
+      @end = possible_end + '~' # add a tilde to make it a true endpoint
     end
   end
 
@@ -144,7 +138,7 @@ class HighLevelBrowse::CallNumberRange
     @begin <= x and @end >= x
   end
 
-  alias_method :cover?,  :contains
+  alias_method :cover?, :contains
   alias_method :member?, :contains
 
 end

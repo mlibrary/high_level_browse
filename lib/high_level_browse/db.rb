@@ -20,9 +20,17 @@ class HighLevelBrowse::DB
   # @param [Array<HighLevelBrowse::CallNumberRange>] array_of_ranges
   def initialize(array_of_ranges)
     @all    = array_of_ranges
-    @ranges = HighLevelBrowse::CallNumberRangeSet.new(@all)
+    @ranges = self.create_letter_indexed_ranges(@all)
   end
 
+  def create_letter_indexed_ranges(all)
+    bins = {}
+    ('A'..'Z').each do |letter|
+      cnrs         = all.find_all {|x| x.firstletter == letter}
+      bins[letter] = HighLevelBrowse::CallNumberRangeSet.new(cnrs)
+    end
+    bins
+  end
 
   # Get the topic arrays associated with this callnumber
   # of the form:
@@ -34,7 +42,12 @@ class HighLevelBrowse::DB
   # @param [String] raw_callnumber_string
   # @return [Array<Array>] A (possibly empty) array of arrays of topics
   def topics(raw_callnumber_string)
-    @ranges.topics_for(raw_callnumber_string)
+    firstletter = raw_callnumber_string.strip.upcase[0]
+    if defined? @ranges[firstletter]
+      @ranges[firstletter].topics_for(raw_callnumber_string)
+    else
+      []
+    end
   end
 
 
