@@ -79,10 +79,19 @@ Michigan, including the
 (exposed as "Academic Discipline" in the facets) and ejournals/databases (and even 
 Librarians!) via the [Browse page](https://www.lib.umich.edu/browse). 
  
- This categorization may be useful for clustering/faceting
+This categorization may be useful for clustering/faceting
 in similar applications at other institutions. Note that the actual creation and 
 maintenance of the call number ranges is done by subject specialist librarians and 
 is out of scope for this gem.
+
+
+## A warning about coverage
+
+Note that not every possible valid callnumber will be necessarily be contained in any 
+dicipline at all. Coverage is known to have some holes, and the ranges themselves 
+sometimes cover essentially a single book in the umich collection.
+
+Hence, this may or may not be useful at your insitution. You'll have to experiment.
 
 ## Installation
 
