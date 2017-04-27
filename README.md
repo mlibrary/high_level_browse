@@ -1,6 +1,6 @@
-# LibraryHlb
+# HighLevelBrowse
 
-TODO: Write a gem description
+Given an LC Call Number, get a
 
 ## Installation
 

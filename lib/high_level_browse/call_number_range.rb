@@ -64,11 +64,12 @@ class HighLevelBrowse::CallNumberRange
     "[#{self.begin_raw} - #{self.end_raw}]"
   end
 
-  def reconstitute(start, stop, begin_raw, end_raw, topic_array)
+  def reconstitute(start, stop, begin_raw, end_raw, firstletter, topic_array)
     @begin       = start
     @end         = stop
     @begin_raw   = begin_raw
     @end_raw     = end_raw
+    @firstletter = firstletter
     @topic_array = topic_array
   end
 
@@ -88,7 +89,7 @@ class HighLevelBrowse::CallNumberRange
   def to_json(*a)
     {
         'json_class' => self.class.name,
-        'data'       => [@begin, @end, @begin_raw, @end_raw, @topic_array]
+        'data'       => [@begin, @end, @begin_raw, @end_raw, @firstletter, @topic_array]
     }.to_json(*a)
   end
 

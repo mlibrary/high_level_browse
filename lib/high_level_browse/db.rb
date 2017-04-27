@@ -41,13 +41,15 @@ class HighLevelBrowse::DB
   #   ]
   # @param [String] raw_callnumber_string
   # @return [Array<Array>] A (possibly empty) array of arrays of topics
-  def topics(raw_callnumber_string)
-    firstletter = raw_callnumber_string.strip.upcase[0]
-    if defined? @ranges[firstletter]
-      @ranges[firstletter].topics_for(raw_callnumber_string)
-    else
-      []
-    end
+  def topics(*raw_callnumber_strings)
+    raw_callnumber_strings.reduce([]) do |acc, raw_callnumber_string|
+      firstletter = raw_callnumber_string.strip.upcase[0]
+      if defined? @ranges[firstletter]
+        acc + @ranges[firstletter].topics_for(raw_callnumber_string)
+      else
+        acc
+      end
+    end.uniq
   end
 
 
@@ -59,8 +61,8 @@ class HighLevelBrowse::DB
   #    (e.g., from 'https://www.lib.umich.edu/browse/categories/xml.php')
   # @return [DB]
   def self.new_from_xml(xml)
-    oga_doc_root = Oga.parse_xml(xml)
-    simple_array_of_cnrs  = cnrs_within_oga_node(node: oga_doc_root)
+    oga_doc_root         = Oga.parse_xml(xml)
+    simple_array_of_cnrs = cnrs_within_oga_node(node: oga_doc_root)
     self.new(simple_array_of_cnrs).freeze
   end
 
@@ -82,7 +84,7 @@ class HighLevelBrowse::DB
     simple_array_of_cnrs = Zlib::GzipReader.open(File.join(dir, FILENAME)) do |infile|
       JSON.load(infile.read).to_a
     end
-    db = self.new(simple_array_of_cnrs)
+    db                   = self.new(simple_array_of_cnrs)
     db.freeze
     db
   end
@@ -113,7 +115,7 @@ class HighLevelBrowse::DB
     else
       current_xpath_component = decendent_xpaths[0]
       new_xpath               = decendent_xpaths[1..-1]
-      new_topic = topic_array.dup
+      new_topic               = topic_array.dup
       new_topic.push node.get(:name) unless node == node.root_node # skip the root
       cnrs = []
       # For each sub-component, get both the call-number-ranges (cnrs) assocaited
@@ -127,12 +129,10 @@ class HighLevelBrowse::DB
   end
 
 
-
-
   # Given a second-to-lowest-level node, get its topic and
   # extract call number ranges from its children
   def self.call_numbers_list_from_leaves(node:, topic_array:)
-    cnrs = []
+    cnrs      = []
     new_topic = topic_array.dup.push node.get(:name)
     node.xpath('call-numbers').each do |cn_node|
       min = cn_node.get(:start)
@@ -148,7 +148,6 @@ class HighLevelBrowse::DB
     cnrs
 
   end
-
 
 
 end
