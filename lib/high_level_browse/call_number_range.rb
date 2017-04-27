@@ -7,21 +7,23 @@ unless defined? LOGGER
   LOGGER = Logger.new(STDERR)
 end
 
+# An efficient set of CallNumberRanges from which to get topics
 class HighLevelBrowse::CallNumberRangeSet < HighLevelBrowse::RangeTree
 
 
-  def topics_for(str)
-    normalized = Lcsort.normalize(HighLevelBrowse::CallNumberRange.strip_down_ends(str))
+  # Returns the array of topic arrays for the given LC string
+  # @param [String] raw_lc A raw LC string (eg., 'qa 112.3 .A4 1990')
+  # @return [Array<Array<String>>] Arrays of topic labels
+  def topics_for(raw_lc)
+    normalized = Lcsort.normalize(HighLevelBrowse::CallNumberRange.strip_down_ends(raw_lc))
     self.search(normalized).map(&:topic_array).uniq
   end
-
 end
 
 
 # A callnumber-range turns callnumbers into integers (or bigints
 # for ZZ* callnumbers). It responds much as a Range does (#begin,
 # #end, #covers)
-
 class HighLevelBrowse::CallNumberRange
   include Comparable
 
@@ -35,6 +37,7 @@ class HighLevelBrowse::CallNumberRange
 
   SPACE_OR_PUNCT = /[\s\p{Punct}]/
 
+  # @nodoc
   def self.strip_down_ends(str)
     str ||= ''
     str.gsub /\A#{SPACE_OR_PUNCT}*(.*?)#{SPACE_OR_PUNCT}*\Z/, '\1'
@@ -51,6 +54,7 @@ class HighLevelBrowse::CallNumberRange
 
 
   # Compare based on begin, then end
+  # @param [CallNumberRange] o the range to compare to
   def <=>(o)
     b = self.begin <=> o.begin
     if b == 0
@@ -60,6 +64,9 @@ class HighLevelBrowse::CallNumberRange
     end
   end
 
+  def to_s
+    "[#{self.begin_raw} - #{self.end_raw}]"
+  end
 
   def reconstitute(start, stop, begin_raw, end_raw, topic_array)
     @begin       = start
@@ -69,10 +76,10 @@ class HighLevelBrowse::CallNumberRange
     @topic_array = topic_array
   end
 
-  def to_s
-    "[#{self.begin_raw} - #{self.end_raw}]"
-  end
 
+  # Two ranges are equal if their begin, end, and topic array
+  # are all the same
+  # @param [CallNumberRange] o the range to compare to
   def ==(other)
     @begin == other.begin and
         @end == other.end and
@@ -80,6 +87,7 @@ class HighLevelBrowse::CallNumberRange
   end
 
 
+  # @nodoc
   # JSON roundtrip
   def to_json(*a)
     {
@@ -88,6 +96,7 @@ class HighLevelBrowse::CallNumberRange
     }.to_json(*a)
   end
 
+  # @nodoc
   def self.json_create(h)
     cnr = self.allocate
     cnr.reconstitute(*(h['data']))
@@ -135,14 +144,7 @@ class HighLevelBrowse::CallNumberRange
     @begin <= x and @end >= x
   end
 
-
   alias_method :cover?,  :contains
   alias_method :member?, :contains
-
-  def self.new_from_oga_node(n, topic_array)
-    self.new(n.get(:start), n.get(:end), topic_array)
-  end
-
-
 
 end
