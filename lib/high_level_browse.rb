@@ -1,8 +1,6 @@
 require "high_level_browse/version"
 require 'high_level_browse/db'
-require 'high_level_browse/errors'
 require 'httpclient'
-require 'stringio'
 
 
 module HighLevelBrowse
@@ -34,4 +32,5 @@ module HighLevelBrowse
   def self.load(dir:)
     DB.load(dir: dir)
   end
+
 end

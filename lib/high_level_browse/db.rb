@@ -2,12 +2,6 @@ require 'oga'
 require 'high_level_browse/call_number_range'
 require 'zlib'
 require 'json'
-require 'high_level_browse/errors'
-require 'logger'
-#use dry-inject for this!!!
-unless defined? LOGGER
-  LOGGER = Logger.new(STDERR)
-end
 
 class HighLevelBrowse::DB
 
@@ -23,6 +17,9 @@ class HighLevelBrowse::DB
     @ranges = self.create_letter_indexed_ranges(@all)
   end
 
+  # Given an array of ranges, create efficient
+  # search structures
+  # @private
   def create_letter_indexed_ranges(all)
     bins = {}
     ('A'..'Z').each do |letter|
@@ -44,7 +41,7 @@ class HighLevelBrowse::DB
   def topics(*raw_callnumber_strings)
     raw_callnumber_strings.reduce([]) do |acc, raw_callnumber_string|
       firstletter = raw_callnumber_string.strip.upcase[0]
-      if defined? @ranges[firstletter]
+      if @ranges.has_key? firstletter
         acc + @ranges[firstletter].topics_for(raw_callnumber_string)
       else
         acc
