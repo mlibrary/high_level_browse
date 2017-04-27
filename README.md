@@ -1,24 +1,13 @@
 # HighLevelBrowse
 
-Given an LC Call Number, get a
+Given an LC Call Number, get a set of academic disciplines associated with it
 
 ## Installation
 
-Add this line to your application's Gemfile:
-
+```bash
     gem 'high_level_browse'
+```
 
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install high_level_browse
-
-## Usage
-
-TODO: Write usage instructions here
 
 ## Contributing
 
