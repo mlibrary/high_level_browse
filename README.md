@@ -42,11 +42,36 @@ hlb.topics('E 99 .S2 Y67 1993', 'PS 3565 .R5734 F67 2015')
 
 ## Overview
 
+While we in the library world sometimes use LC Call Numbers (or at least
+the initial letters) as a proxy for subject matter, the mapping is iffy
+in many cases and is, in any case, one-dimensional. Many works simply
+cover multiple subjects or are relevant to sometimes quite different
+types of academics.
+
+Take, for example, the chemistry of the brain as it applies to mental
+illness. We have a book, _Endorphins : new waves in brain chemistry_
+cataloged as **QP552.E53 D381 1984**. The QP's map to "Phsiology", which
+is correct but not complete.
+
 The University of Michigan Library has for years maintained 
-the [High Level Browse](https://www.lib.umich.edu/browse/categories/),
+the [High Level Browse](https://www.lib.umich.edu/browse/categories/) (HLB),
 a mapping of call-number ranges to academic subjects. The entire 
 data set is available as [1.8MB XML file](https://www.lib.umich.edu/browse/categories/xml.php)
 for download.
+
+In the HLB, the call number for _Endorphins : new waves in brain chemistry_ maps
+to the following categories:
+
+* Science | Physiology
+* Health Sciences | Physiology
+* Health Sciences | Public Health (General)
+* Science | Chemical Engineering
+* Engineering | Chemical Engineering
+* Health Sciences | Biological Chemistry
+* Science | Chemistry | Biological Chemistry
+
+This opens up potentially more accurate categorization of works for, say, 
+faceting in a library catalog.
 
 This gem gives a relatively time-efficient way to get the set of disciplines associated
 with the given callnumber or callnumbers as part of indexing MARC records into Solr. 
@@ -111,7 +136,9 @@ Note that not every possible valid callnumber will be necessarily be contained i
 dicipline at all. Coverage is known to have some holes, and the ranges themselves 
 sometimes cover essentially a single book in the umich collection.
 
-Hence, this may or may not be useful at your insitution. You'll have to experiment.
+And, of course, not every record is going to have a LC Call Number, so there's that.
+
+This is all to say: this may or may not be useful at your insitution. You'll have to experiment.
 
 ## Performance
 
