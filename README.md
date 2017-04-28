@@ -61,14 +61,14 @@ in similar applications at other institutions. Note that the actual creation and
 maintenance of the call number ranges is done by subject specialist librarians and 
 is out of scope for this gem.
 
-## Working from the command line
+## Command line utilities: `fetch_new_hlb` and `hlb`
 
 There are also a couple command line applications for managing and querying the
 data.
 
 * **fetch_new_hlb** tries to grab a new copy of the data from the umich website
-  and serialize it to the given directory. Useful for putting in a cron job
-  to periodically update with fresh data
+  and serialize it to a ~500k file called `hlb.json.gz` in the given directory. 
+  Useful for putting in a cron job to periodically update with fresh data
   
 ```bash
 
@@ -81,9 +81,10 @@ and stick it in the given directory
 ```
 
 * **hlb** takes one or more callnumbers and returns a text display of the categories
-  associated with them. It will stash a copy of the database in `Dir.tmpdir` (e.g., 
-  `/tmp/` on unix, or something weird under OSX) if there isn't one there already, 
-  and use it on subsequent calls so things aren't so desperately slow.
+  associated with them. It will stash a copy of the database in `Dir.tmpdir`if there 
+  isn't one there already, and use it on subsequent calls so things aren't so 
+  desperately slow. (To find your tmpdir, in your shell
+  run `ruby -e 'require "tmpdir"; puts Dir.tmpdir'`)
 
 
 ```bash
