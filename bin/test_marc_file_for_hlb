@@ -57,8 +57,7 @@ Counter = Struct.new(:count, :invalid, :found, :notfound, :hlb) do
 end
 
 
-def puts_output(records, f050, f852)
-  puts "Processed #{records} records"
+def puts_output(f050, f852)
   puts "050 fields"
   f050.puts_pretty_output
   puts "\n852h fields"
@@ -71,6 +70,7 @@ dir      = Dir.tmpdir()
 fullpath = File.join(dir, filename)
 
 hlb = if File.exist?(fullpath)
+        puts "Using file at #{fullpath}"
         HighLevelBrowse.load(dir: dir)
       else
         HighLevelBrowse.fetch_and_save(dir: dir)
@@ -80,27 +80,40 @@ f050    = Counter.new(0, 0, 0, 0, hlb)
 f852    = Counter.new(0, 0, 0, 0, hlb)
 records = 0
 matched_records = 0
-puts "Beginning analysis of marc records"
+possible_records = 0
+puts "Beginning analysis of marc records with 2k record progress reports"
 reader.each do |r|
   records += 1
   found = 0
-  puts '%8d records processed so far' % records if records % 10_000 == 0
+  possible = false
+  puts '%8d records processed so far' % records if records % 2_000 == 0
   if r['050']
     cns = r.fields('050').map { |x| x.map(&:value).join('') }
     cns.each do |cn|
       found += f050.update(cn)
+      possible = true
     end
     cns = r.fields('852').keep_if { |x| x['h'] }.map { |x| x['h'] }
     cns.each do |cn|
       found += f852.update(cn)
+      possible = true
     end
   end
   matched_records += 1 if found > 0
+  possible_records += 1 if possible
 end
 
 puts "\n\n"
-puts_output(records, f050, f852)
-puts "At the <record> level, %d (%4.2f%%) had at least one category" % [matched_records, matched_records.to_f / records * 100]
+puts_output(f050, f852)
+puts format(
+       %Q[\nOf %d records,
+  %d (%4.2f%%) had a field that often contains an LC Call Number
+  %d (%4.2f%%) of *those* had at least one HLB category"],
+        records,
+        possible_records,
+        possible_records.to_f / records,
+        matched_records,
+        matched_records.to_f / possible_records * 100)
 
 
 
