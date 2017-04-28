@@ -32,6 +32,7 @@ fullpath = File.join(dir, filename)
 hlb = if File.exist?(fullpath)
         HighLevelBrowse.load(dir: dir)
       else
+        STDERR.puts "Fetching raw data from UMich; wait a sec"
         HighLevelBrowse.fetch_and_save(dir: dir)
       end
 
