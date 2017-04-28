@@ -111,7 +111,7 @@ puts format(
   %d (%4.2f%%) of *those* had at least one HLB category"],
         records,
         possible_records,
-        possible_records.to_f / records,
+        possible_records.to_f / records * 100,
         matched_records,
         matched_records.to_f / possible_records * 100)
 
