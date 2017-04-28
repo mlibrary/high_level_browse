@@ -85,13 +85,31 @@ maintenance of the call number ranges is done by subject specialist librarians a
 is out of scope for this gem.
 
 
-## A warning about coverage
+## A warning about (lack of) coverage
 
 Note that not every possible valid callnumber will be necessarily be contained in any 
 dicipline at all. Coverage is known to have some holes, and the ranges themselves 
 sometimes cover essentially a single book in the umich collection.
 
 Hence, this may or may not be useful at your insitution. You'll have to experiment.
+
+## Performance
+
+On my laptop under normal load (e.g., not very scientific at all)
+I get the following running in a single thread
+
+```
+  ruby 2.3  this gem       ~8500 lookups/second
+  ruby 2.4  this gem       ~9100 lookups/second
+  jruby 9   this gem     ~20,000 lookups/second
+  jruby 9,  old HLB.jar    ~6500 lookups/second
+  jruby 1.7 this gem             error, can't do named arguments since it's 1.9 mode
+  jruby 1.7 old HLB.jar    ~6700 lookups/second
+```
+
+The [old HLB.jar](https://github.com/billdueber/HLB-Java) refers to a pure java version that I call from within
+Jruby as part of my catalog indexing process now. Ithas a different (worse) algorithm, but is of
+interest because it's what I'm writing this to replace.
 
 ## Installation
 
