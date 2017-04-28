@@ -82,8 +82,8 @@ and stick it in the given directory
 
 * **hlb** takes one or more callnumbers and returns a text display of the categories
   associated with them. It will stash a copy of the database in `Dir.tmpdir` (e.g., 
-  `/tmp/`) if there isn't one there already, and use it on subsequent calls so things
-  aren't so desperately slow.
+  `/tmp/` on unix, or something weird under OSX) if there isn't one there already, 
+  and use it on subsequent calls so things aren't so desperately slow.
 
 
 ```bash
