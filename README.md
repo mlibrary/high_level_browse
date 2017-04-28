@@ -10,7 +10,7 @@ use 'high_level_browse'
 
 # Pull a new version of the raw data from the UM website,
 # transform it into something that can be quickly searched,
-# and save to the specified directory
+# and serialize it to `hlb.json.gz` in the specified directory
 hlb = HighLevelBrowse.fetch_and_save(dir: '/tmp')
 
 # ...or just grab an already fetch_and_saved copy
@@ -21,14 +21,14 @@ hlb.topics 'hc 9112.2'
 # => [["Social Sciences", "Economics"],
 #     ["Social Sciences", "Social Sciences (General)"]]
 
-# ... or use the shortcut syntax
+# ... or use the #[] shortcut syntax
 
 hlb['NC1766 .U52 D733 2014']
 # => [["Arts", "Art History"],
 #    ["Arts", "Art and Design"],
 #    ["Arts", "Film and Video Studies"]]
 
-# You can also send more than one at a time
+# You can also send more than one call number at a time
 
 hlb.topics('E 99 .S2 Y67 1993', 'PS 3565 .R5734 F67 2015')
 # => [["Humanities", "American Culture"],
@@ -39,29 +39,6 @@ hlb.topics('E 99 .S2 Y67 1993', 'PS 3565 .R5734 F67 2015')
 
 ```
 
-There are also a couple command line applications for managing and querying the
-data.
-
-```bash
-
-$> fetch_new_hlb
-
-fetch_new_hlb -- get a new copy of the HLB ready for use by high_level_browse
-and stick it in the given directory
-
-   fetch_new_hlb <dir>
-
-$> hlb
-
-hlb -- get high level browse data for an LC call number
-
-Example:
-   hlb "qa 11.33 .C4 .H3"
-   or do several at once
-   hlb "PN 33.4" "AC 1122.3 .C22" ...
-
-
-```
 
 ## Overview
 
@@ -83,6 +60,48 @@ This categorization may be useful for clustering/faceting
 in similar applications at other institutions. Note that the actual creation and 
 maintenance of the call number ranges is done by subject specialist librarians and 
 is out of scope for this gem.
+
+## Working from the command line
+
+There are also a couple command line applications for managing and querying the
+data.
+
+* **fetch_new_hlb** tries to grab a new copy of the data from the umich website
+  and serialize it to the given directory. Useful for putting in a cron job
+  to periodically update with fresh data
+  
+```bash
+
+$> fetch_new_hlb
+
+fetch_new_hlb -- get a new copy of the HLB ready for use by high_level_browse
+and stick it in the given directory
+
+   Usage: fetch_new_hlb <dir>
+```
+
+* **hlb** takes one or more callnumbers and returns a text display of the categories
+  associated with them. It will stash a copy of the database in `Dir.tmpdir` (e.g., 
+  `/tmp/`) if there isn't one there already, and use it on subsequent calls so things
+  aren't so desperately slow.
+
+
+```bash
+$> hlb
+
+hlb -- get high level browse data for an LC call number
+
+Example:
+   hlb "qa 11.33 .C4 .H3"
+    or do several at once
+   hlb "PN 33.4" "AC 1122.3 .C22" ...
+ 
+# Let's try it
+$> hlb "qa 11.33 .C4 .H3"
+   
+   Science | Mathematics
+   Social Sciences | Education   
+```
 
 
 ## A warning about (lack of) coverage
