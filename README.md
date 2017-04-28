@@ -1,6 +1,6 @@
 # HighLevelBrowse
 
-Given an LC Call Number, get a set of academic disciplines associated with it
+Given an LC Call Number, try to get a set of academic disciplines associated with it
 
 ## Usage
 
