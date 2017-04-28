@@ -5,10 +5,12 @@ $:.unshift '.'
 
 # On my laptop under normal load (e.g., not very scientific at all)
 # I get the following running in a single thread
-#   ruby 2.3              ~8500 lookups/second
-#   ruby 2.4              ~9100 lookups/second
-#   jruby 9               ~2kk  lookups/second
-#   jruby 9, old HLB.jar  ~6500 lookups/second
+#   ruby 2.3               ~8500 lookups/second
+#   ruby 2.4               ~9100 lookups/second
+#   jruby 9                ~20k  lookups/second
+#   jruby 9, old HLB.jar   ~6500 lookups/second
+#   jruby 1.7                    error, can't do named arguments
+#   jruby 1.7, old HLB.jar ~6700 lookups/second
 #
 # The old HLB.jar has a different/worse algorithm, but is of
 # interest because it's what I'm writing this to replace.
@@ -39,7 +41,8 @@ puts RUBY_DESCRIPTION
 
 total = 0
 Benchmark.ips do |x|
-  x.config(:time => 15, :warmup => 5)
+  x.config(:time => 25, :warmup => 25)
+  
   x.report("HLB lookups") do
     total += h[cns.next].count
   end
