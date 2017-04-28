@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency 'httpclient', "~> 2.5"
-  spec.add_dependency 'oga', '>=0.2'
+  spec.add_dependency 'oga', '~> 2.1'
   spec.add_dependency 'lcsort'
 
   spec.add_development_dependency "bundler", "~> 1.6"

@@ -1,7 +1,7 @@
 require "high_level_browse/version"
 require 'high_level_browse/db'
-require 'httpclient'
-
+require 'uri'
+require 'open-uri'
 
 module HighLevelBrowse
 
@@ -10,9 +10,14 @@ module HighLevelBrowse
   # Fetch a new version of the raw file and turn it into a db
   # @return [DB] The loaded database
   def self.fetch
-    res = HTTPClient.get(SOURCE_URL, :follow_redirect => false)
-    raise "Could not fetch xml from '#{SOURCE_URL}' (status code #{res.status})" unless res.status == 200
-    return DB.new_from_xml(res.content)
+    uri = URI.parse(SOURCE_URL)
+    # Why on earth OpenURI::OpenRead is mixed into http but not https, I don't know
+    uri.extend OpenURI::OpenRead
+
+    xml = uri.read
+    return DB.new_from_xml(xml)
+  rescue => e
+    raise "Could not fetch xml from '#{SOURCE_URL}': #{e}"
   end
 
 

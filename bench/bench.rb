@@ -12,7 +12,7 @@ $:.unshift '.'
 #   jruby 1.7                    error, can't do named arguments
 #   jruby 1.7, old HLB.jar ~6700 lookups/second
 #
-# The old HLB.jar has a different/worse algorithm, but is of
+# The old HLB.jar has a different (worse) algorithm, but is of
 # interest because it's what I'm writing this to replace.
 
 # umich_traject holds .jar files with the old java implementation; see
@@ -42,7 +42,7 @@ puts RUBY_DESCRIPTION
 total = 0
 Benchmark.ips do |x|
   x.config(:time => 25, :warmup => 25)
-  
+
   x.report("HLB lookups") do
     total += h[cns.next].count
   end
