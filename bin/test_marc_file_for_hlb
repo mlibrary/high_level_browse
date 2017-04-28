@@ -108,7 +108,7 @@ puts_output(f050, f852)
 puts format(
        %Q[\nOf %d records,
   %d (%4.2f%%) had a field that often contains an LC Call Number
-  %d (%4.2f%%) of *those* had at least one HLB category"],
+  %d (%4.2f%%) of *those* had at least one HLB category],
         records,
         possible_records,
         possible_records.to_f / records * 100,
