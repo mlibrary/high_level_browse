@@ -135,7 +135,7 @@ class HighLevelBrowse::DB
       min = cn_node.get(:start)
       max = cn_node.get(:end)
 
-      new_cnr = HighLevelBrowse::CallNumberRange.new(start: min, stop: max, topic_array: new_topic)
+      new_cnr = HighLevelBrowse::CallNumberRange.new(min: min, max: max, topic_array: new_topic)
       if new_cnr.illegal?
         # do some sort of logging
       else
