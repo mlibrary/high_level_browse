@@ -16,9 +16,10 @@ class HighLevelBrowse::CallNumberRangeSet < HighLevelBrowse::RangeTree
 end
 
 
-# A callnumber-range turns callnumbers into integers (or bigints
-# for ZZ* callnumbers). It responds much as a Range does (#@min,
-# #end, #covers)
+# A callnumber-range keeps track of the original begin/end
+# strings as well as the normalized versions, and can be
+# serialized to JSON
+
 class HighLevelBrowse::CallNumberRange
   include Comparable
 

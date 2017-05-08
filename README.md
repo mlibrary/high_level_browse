@@ -123,22 +123,46 @@ Example:
    hlb "PN 33.4" "AC 1122.3 .C22" ...
  
 # Let's try it
-$> hlb "qa 11.33 .C4 .H3"
+$> hlb "qa 11.33 .C4"
    
    Science | Mathematics
    Social Sciences | Education   
+   
 ```
 
 
 ## A warning about (lack of) coverage
 
 Note that not every possible valid callnumber will be necessarily be contained in any 
-dicipline at all. Coverage is known to have some holes, and the ranges themselves 
-sometimes cover essentially a single book in the umich collection.
+dicipline at all. Many books aren't academic in nature, and even then
+coverage is known to have some holes. Some of the ranges cover essentially a 
+single book in the umich collection. And, of course, not every record is going 
+to have a LC Call Number, so there's that.
 
-And, of course, not every record is going to have a LC Call Number, so there's that.
+This is all to say: this may or may not be useful at your insitution. You'll 
+have to experiment.
 
-This is all to say: this may or may not be useful at your insitution. You'll have to experiment.
+To help with this, there's a little script in the `bin/` directory called 
+`test_marc_file_for_hlb` which will, when given a MARC-XML file (ending in `.xml`)
+or a MARC-binary file (ending in anything else), output some statistics on
+what kind of coverage you would get. It might be useful to send a test file 
+through there to see what comes up. It looks in the `050` and the `852[h]` to
+see if anything pops, but you can make it looks elsewhere pretty easily.
+
+It produces something like this:
+
+```
+050 fields
+     9790 total
+      209 not recognized as LC call numbers
+     9337 with at least one HLB category
+      244 with NO category
+
+Of 17642 records,
+  9677 (54.85%) had a field that often contains an LC Call Number
+  9262 (95.71%) of *those* had at least one HLB category
+
+```
 
 ## Performance
 
