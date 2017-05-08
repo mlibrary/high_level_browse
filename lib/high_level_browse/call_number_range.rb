@@ -33,7 +33,8 @@ class HighLevelBrowse::CallNumberRange
   # @nodoc
   def self.strip_down_ends(str)
     str ||= ''
-    str.gsub /\A#{SPACE_OR_PUNCT}*(.*?)#{SPACE_OR_PUNCT}*\Z/, '\1'
+    str = str.gsub /\A#{SPACE_OR_PUNCT}*(.*?)#{SPACE_OR_PUNCT}*\Z/, '\1'
+    str.upcase.gsub /(\d)([A-Z])/, '\1 \2'
   end
 
 
