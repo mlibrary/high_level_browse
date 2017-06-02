@@ -10,7 +10,7 @@ class HighLevelBrowse::CallNumberRangeSet < HighLevelBrowse::RangeTree
   # @param [String] raw_lc A raw LC string (eg., 'qa 112.3 .A4 1990')
   # @return [Array<Array<String>>] Arrays of topic labels
   def topics_for(raw_lc)
-    normalized = Lcsort.normalize(HighLevelBrowse::CallNumberRange.strip_down_ends(raw_lc))
+    normalized = Lcsort.normalize(HighLevelBrowse::CallNumberRange.preprocess(raw_lc))
     self.search(normalized).map(&:topic_array).uniq
   end
 end
@@ -28,21 +28,36 @@ class HighLevelBrowse::CallNumberRange
 
   attr_accessor :topic_array, :redundant
 
-  SPACE_OR_PUNCT = /[\s\p{Punct}]/
+  SPACE_OR_PUNCT = /\A[\s\p{Punct}]*(.*?)[\s\p{Punct}]*\Z/
+  DIGIT_TO_LETTER = /(\d)([A-Z])/i
 
   # @nodoc
-  def self.strip_down_ends(str)
+  # Remove spaces/punctuation from the ends of the string
+  def self.strip_spaces_and_punct(str)
+    str.gsub(SPACE_OR_PUNCT, '\1')
+  end
+
+  # @nodoc
+  # Force a space between any digit->letter transition
+  def self.force_break_between_digit_and_letter(str)
+    str.gsub(DIGIT_TO_LETTER, '\1 \2')
+  end
+  # @nodoc
+  # Preprocess the string, removing spaces/punctuation off the end
+  # and forcing a space where there's a digit->letter transition
+  def self.preprocess(str)
     str ||= ''
-    str = str.gsub /\A#{SPACE_OR_PUNCT}*(.*?)#{SPACE_OR_PUNCT}*\Z/, '\1'
-    str.upcase.gsub /(\d)([A-Z])/, '\1 \2'
+    force_break_between_digit_and_letter(
+        strip_spaces_and_punct(str)
+    )
   end
 
 
   def initialize(min:, max:, topic_array:)
     @illegal     = false
     @redundant   = false
-    self.min     = self.class.strip_down_ends(min)
-    self.max     = self.class.strip_down_ends(max)
+    self.min     = self.class.preprocess(min)
+    self.max     = self.class.preprocess(max)
     @topic_array = topic_array
     @firstletter = self.min[0] unless @illegal
   end
