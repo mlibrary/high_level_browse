@@ -1,4 +1,4 @@
-require 'oga'
+require 'nokogiri'
 require 'high_level_browse/call_number_range'
 require 'zlib'
 require 'json'
@@ -58,8 +58,8 @@ class HighLevelBrowse::DB
   #    (e.g., from 'https://www.lib.umich.edu/browse/categories/xml.php')
   # @return [DB]
   def self.new_from_xml(xml)
-    oga_doc_root         = Oga.parse_xml(xml)
-    simple_array_of_cnrs = cnrs_within_oga_node(node: oga_doc_root)
+    noko_doc_root         = Nokogiri::XML(xml)
+    simple_array_of_cnrs = cnrs_within_noko_node(node: noko_doc_root)
     self.new(simple_array_of_cnrs).freeze
   end
 
@@ -102,24 +102,24 @@ class HighLevelBrowse::DB
   #  * what the current topics are ([level1, level2])
   # Get all the call numbers assocaited with the topic represented by the given node,
   # as well as all the children of the given node, and send it back as a big ol' array
-  # @param [Oga::Node] node A node of the parsed HLB XML file
+  # @param [Nokogiri::XML::Node] node A node of the parsed HLB XML file
   # @param [Array<String>] decendent_xpaths A list of xpaths to the decendents of this node
   # @param [Array<String>] topic_array An array with all levels of the topics associated with this node
   # @return [Array<HighLevelBrowse::CallNumberRange>]
-  def self.cnrs_within_oga_node(node:, decendent_xpaths: ['/hlb/subject', 'topic', 'sub-topic'], topic_array: [])
+  def self.cnrs_within_noko_node(node:, decendent_xpaths: ['/hlb/subject', 'topic', 'sub-topic'], topic_array: [])
     if decendent_xpaths.empty?
       [] # base case -- we're as low as we're going to go
     else
       current_xpath_component = decendent_xpaths[0]
       new_xpath               = decendent_xpaths[1..-1]
       new_topic               = topic_array.dup
-      new_topic.push node.get(:name) unless node == node.root_node # skip the root
+      new_topic.push node[:name] unless node == node.document # skip the root
       cnrs = []
       # For each sub-component, get both the call-number-ranges (cnrs) assocaited
       # with this level, as well as recusively getting from all the children
       node.xpath(current_xpath_component).each do |c|
         cnrs += call_numbers_list_from_leaves(node: c, topic_array: new_topic)
-        cnrs += cnrs_within_oga_node(node: c, decendent_xpaths: new_xpath, topic_array: new_topic)
+        cnrs += cnrs_within_noko_node(node: c, decendent_xpaths: new_xpath, topic_array: new_topic)
       end
       cnrs
     end
@@ -130,10 +130,10 @@ class HighLevelBrowse::DB
   # extract call number ranges from its children
   def self.call_numbers_list_from_leaves(node:, topic_array:)
     cnrs      = []
-    new_topic = topic_array.dup.push node.get(:name)
+    new_topic = topic_array.dup.push node[:name]
     node.xpath('call-numbers').each do |cn_node|
-      min = cn_node.get(:start)
-      max = cn_node.get(:end)
+      min = cn_node[:start]
+      max = cn_node[:end]
 
       new_cnr = HighLevelBrowse::CallNumberRange.new(min: min, max: max, topic_array: new_topic)
       if new_cnr.illegal?
