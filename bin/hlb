@@ -28,7 +28,7 @@ require 'tmpdir'
 filename = HighLevelBrowse::DB::FILENAME
 dir      = Dir.tmpdir()
 fullpath = File.join(dir, filename)
-
+puts fullpath
 hlb = if File.exist?(fullpath)
         HighLevelBrowse.load(dir: dir)
       else
