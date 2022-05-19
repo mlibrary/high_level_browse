@@ -48,8 +48,8 @@ module HighLevelBrowse
     end
 
     def search(range, limit: Float::INFINITY)
+      return [] if range.nil?
       range = range.is_a?(Range) ? range : (range..range)
-
       result = []
       RangeTree.search_helper(range, @root, result, limit)
 
@@ -58,7 +58,6 @@ module HighLevelBrowse
 
     def self.search_helper(q, root, result, limit)
       return if root.nil?
-
       # Visit left child?
       if (l = root.left) and l.max and q.min and \
         not l.max < q.min # The interesting part.
@@ -70,6 +69,10 @@ module HighLevelBrowse
       # point of checking, there wasn't added too many, but after left child has
       # been checked, we might hit the limit and then, "this" will add one as
       # well.
+      #
+      # (I'm leaving the above paragraph intact as a reminder to myself to
+      # read things over and make sure they're, you know, actual English. At this point
+      # in 2022 I have no idea what the heck I was saying.
 
       # Add root?
       result << root.range if RangeTree.ranges_intersect?(q, root.range)

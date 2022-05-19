@@ -7,7 +7,6 @@ end
 
 require 'marc'
 require 'high_level_browse'
-require 'lcsort'
 require 'tmpdir'
 
 
@@ -38,7 +37,7 @@ Counter = Struct.new(:count, :invalid, :found, :notfound, :hlb) do
 
 
   def check_cn(cn)
-    normalized = Lcsort.normalize(cn)
+    normalized = HighLevelBrowse::CallNumberRange.callnumber_normalize(cn)
     return :invalid if normalized.nil?
     cats = hlb[cn]
     if cats.empty?
