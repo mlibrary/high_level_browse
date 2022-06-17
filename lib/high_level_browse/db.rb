@@ -42,11 +42,13 @@ class HighLevelBrowse::DB
     raw_callnumber_strings.reduce([]) do |acc, raw_callnumber_string|
       firstletter = if raw_callnumber_string.nil?
                       nil
-                    else raw_callnumber_string.to_s.strip.downcase[0]
+                    else
+                      raw_callnumber_string.to_s.strip.downcase[0]
                     end
       if @ranges.has_key? firstletter
         acc + @ranges[firstletter].topics_for(raw_callnumber_string)
-      else acc
+      else
+        acc
       end
     end.uniq
   end
@@ -104,21 +106,22 @@ class HighLevelBrowse::DB
   # @param [Array<String>] decendent_xpaths A list of xpaths to the decendents of this node
   # @param [Array<String>] topic_array An array with all levels of the topics associated with this node
   # @return [Array<HighLevelBrowse::CallNumberRange>]
-  def self.cnrs_within_noko_node(node:, decendent_xpaths: ['/hlb/subject', 'topic', 'sub-topic'], topic_array: [])
+  def self.cnrs_within_noko_node(node:, decendent_xpaths: ['/hlb/subject', 'topic'], topic_array: [])
     if decendent_xpaths.empty?
       [] # base case -- we're as low as we're going to go
-    else current_xpath_component = decendent_xpaths[0]
-    new_xpath = decendent_xpaths[1..-1]
-    new_topic = topic_array.dup
-    new_topic.push node[:name] unless node == node.document # skip the root
-    cnrs = []
-    # For each sub-component, get both the call-number-ranges (cnrs) assocaited
-    # with this level, as well as recusively getting from all the children
-    node.xpath(current_xpath_component).each do |c|
-      cnrs += call_numbers_list_from_leaves(node: c, topic_array: new_topic)
-      cnrs += cnrs_within_noko_node(node: c, decendent_xpaths: new_xpath, topic_array: new_topic)
-    end
-    cnrs
+    else
+      current_xpath_component = decendent_xpaths[0]
+      new_xpath = decendent_xpaths[1..-1]
+      new_topic = topic_array.dup
+      new_topic.push node[:name] unless node == node.document # skip the root
+      cnrs = []
+      # For each sub-component, get both the call-number-ranges (cnrs) assocaited
+      # with this level, as well as recusively getting from all the children
+      node.xpath(current_xpath_component).each do |c|
+        cnrs += call_numbers_list_from_leaves(node: c, topic_array: new_topic)
+        cnrs += cnrs_within_noko_node(node: c, decendent_xpaths: new_xpath, topic_array: new_topic)
+      end
+      cnrs
     end
   end
 
@@ -134,6 +137,8 @@ class HighLevelBrowse::DB
       new_cnr = HighLevelBrowse::CallNumberRange.new(min: min, max: max, topic_array: new_topic)
       if new_cnr.illegal?
         # do some sort of logging else cnrs.push new_cnr
+      else
+        cnrs << new_cnr
       end
     end
     cnrs

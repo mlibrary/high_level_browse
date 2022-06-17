@@ -1,5 +1,9 @@
 # High Level Browse
 
+## 1.1.0
+
+Change code to deal with new UMich XML format
+
 ## 1.0.0
 
 * New normalization algorithm.

@@ -15,6 +15,7 @@ module HighLevelBrowse
     uri.extend OpenURI::OpenRead
 
     xml = uri.read
+
     return DB.new_from_xml(xml)
   rescue => e
     raise "Could not fetch xml from '#{SOURCE_URL}': #{e}"
