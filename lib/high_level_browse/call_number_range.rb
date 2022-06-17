@@ -1,9 +1,10 @@
-require 'high_level_browse/range_tree'
+# frozen_string_literal: true
+
+require "high_level_browse/range_tree"
 
 # An efficient set of CallNumberRanges from which to get topics
 class HighLevelBrowse::CallNumberRangeSet < HighLevelBrowse::RangeTree
-
-  ANY_DIGIT = /\d/.freeze
+  ANY_DIGIT = /\d/
 
   def has_digits(str)
     ANY_DIGIT.match?(str)
@@ -14,9 +15,9 @@ class HighLevelBrowse::CallNumberRangeSet < HighLevelBrowse::RangeTree
   # @return [Array<Array<String>>] Arrays of topic labels
   def topics_for(raw_lc)
     normalized = ::HighLevelBrowse::CallNumberRange.callnumber_normalize(raw_lc)
-    self.search(normalized).map(&:topic_array).uniq
+    search(normalized).map(&:topic_array).uniq
   rescue => e
-    require 'pry'; binding.pry
+    raise "Error getting topics for '#{raw_lc}': #{e}"
   end
 end
 
@@ -57,7 +58,7 @@ class HighLevelBrowse::CallNumberRange
 
   # Normalize the callnumber in a slightly more sane way
   # @param [String] cn The raw callnumber to normalize
-  CN = /\A\s*(?<letters>\p{L}{1,3})\s*(?<digits>\d{1,5}(?!\d))(?:\.(?<decimals>\d+))?(?<rest>.*)\Z/.freeze
+  CN = /\A\s*(?<letters>\p{L}{1,3})\s*(?<digits>\d{1,5}(?!\d))(?:\.(?<decimals>\d+))?(?<rest>.*)\Z/
 
   def self.callnumber_normalize(cs_str)
     return nil if cs_str.nil?
@@ -72,7 +73,7 @@ class HighLevelBrowse::CallNumberRange
     decimals = m[:decimals] ? "." + m[:decimals] : ""
     rest = cleanup_freetext(m[:rest])
     clean = m[:letters] + digits + decimals + " " + rest
-    clean.strip.gsub(/\s+/, ' ')
+    clean.strip.gsub(/\s+/, " ")
   end
 
   # @param [String] str String to clean up
@@ -85,11 +86,11 @@ class HighLevelBrowse::CallNumberRange
     s = replace_dot_before_letter_with_space(s)
     s = remove_dots_between_letters(s)
     s = force_space_between_digit_and_letter(s)
-    s.strip.gsub(/\s+/, ' ')
+    s.strip.gsub(/\s+/, " ")
   end
 
   def self.replace_dot_before_letter_with_space(s)
-    s.gsub /\.(\p{L})/, '\\1'
+    s.gsub(/\.(\p{L})/, '\\1')
   end
 
   # @param [String] str
@@ -112,12 +113,12 @@ class HighLevelBrowse::CallNumberRange
 
   # Compare based on @min, then end
   # @param [CallNumberRange] o the range to compare to
-  def <=>(o)
-    [self.min, self.max] <=> [o.min, o.max]
+  def <=>(other)
+    [min, max] <=> [other.min, other.max]
   end
 
   def to_s
-    "[#{self.min_raw} - #{self.max_raw}]"
+    "[#{min_raw} - #{max_raw}]"
   end
 
   def reconstitute(min, max, min_raw, max_raw, firstletter, topic_array)
@@ -139,14 +140,13 @@ class HighLevelBrowse::CallNumberRange
   # @nodoc
   # JSON roundtrip
   def to_json(*a)
-    {'json_class' => self.class.name, 'data' => [@min, @max, @min_raw, @max_raw, @firstletter, @topic_array]
-    }.to_json(*a)
+    {"json_class" => self.class.name, "data" => [@min, @max, @min_raw, @max_raw, @firstletter, @topic_array]}.to_json(*a)
   end
 
   # @nodoc
   def self.json_create(h)
-    cnr = self.allocate
-    cnr.reconstitute(*(h['data']))
+    cnr = allocate
+    cnr.reconstitute(*(h["data"]))
     cnr
   end
 
@@ -158,7 +158,8 @@ class HighLevelBrowse::CallNumberRange
     if possible_min.nil? # didn't normalize
       @illegal = true
       nil
-    else @min = possible_min
+    else
+      @min = possible_min
     end
   end
 
@@ -169,7 +170,8 @@ class HighLevelBrowse::CallNumberRange
     if possible_max.nil? # didn't normalize
       @illegal = true
       nil
-    else @max = possible_max + '~' # add a tilde to make it a true endpoint
+    else
+      @max = possible_max + "~" # add a tilde to make it a true endpoint
     end
   end
 
@@ -187,5 +189,4 @@ class HighLevelBrowse::CallNumberRange
 
   alias_method :cover?, :contains
   alias_method :member?, :contains
-
 end
