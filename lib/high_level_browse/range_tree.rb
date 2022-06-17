@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Never released as a gem, as near as I can tell.
 # Taken from https://github.com/clearhaus/range-tree,
 # which was released under the MIT license
@@ -10,11 +12,11 @@ module HighLevelBrowse
   class RangeTree
     class Node
       def initialize(left, range, right, min, max)
-        @left  = left
+        @left = left
         @range = range
         @right = right
-        @min   = min || range.min
-        @max   = max || range.max
+        @min = min || range.min
+        @max = max || range.max
       end
 
       attr_reader :left, :range, :right, :min, :max
@@ -26,7 +28,7 @@ module HighLevelBrowse
       # same left endpoint, then it's more efficient if also secondarily sorted by
       # the right endpoint (or equivalently by the length).
 
-      @root = RangeTree.split(ranges.sort{|a,b| (a.min <=> b.min) || (a.max <=> b.max)})
+      @root = RangeTree.split(ranges.sort { |a, b| (a.min <=> b.min) || (a.max <=> b.max) })
     end
 
     attr_reader :root
@@ -34,17 +36,17 @@ module HighLevelBrowse
     def self.split(ranges)
       return nil if ranges.empty?
 
-      middle = ranges.length/2
+      middle = ranges.length / 2
 
-      left  = split(ranges.slice(0, middle)) # Handle middle == 0 correctly.
+      left = split(ranges.slice(0, middle)) # Handle middle == 0 correctly.
       range = ranges[middle] # Current range.
-      right = split(ranges[(middle+1)..-1]) # Handle middle == ranges.length correctly.
+      right = split(ranges[(middle + 1)..-1]) # Handle middle == ranges.length correctly.
 
       ary = [left, range, right].compact
 
       Node.new(left, range, right,
-               ary.map(&:min).min, # Subtree's min.
-               ary.map(&:max).max) # Subtree's max.
+        ary.map(&:min).min, # Subtree's min.
+        ary.map(&:max).max) # Subtree's max.
     end
 
     def search(range, limit: Float::INFINITY)
@@ -59,8 +61,7 @@ module HighLevelBrowse
     def self.search_helper(q, root, result, limit)
       return if root.nil?
       # Visit left child?
-      if (l = root.left) and l.max and q.min and \
-        not l.max < q.min # The interesting part.
+      if (l = root.left) && l.max && q.min && (l.max >= q.min) # The interesting part.
         search_helper(q, root.left, result, limit)
       end
 
@@ -78,8 +79,7 @@ module HighLevelBrowse
       result << root.range if RangeTree.ranges_intersect?(q, root.range)
 
       # Visit right child?
-      if (r = root.right) and q.max and r.min and \
-        not q.max < r.min # The interesting part.
+      if (r = root.right) && q.max && r.min && (q.max >= r.min) # The interesting part.
         search_helper(q, root.right, result, limit)
       end
     end

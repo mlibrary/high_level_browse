@@ -1,3 +1,3 @@
-  module HighLevelBrowse
-    VERSION = "1.1.0"
-  end
+module HighLevelBrowse
+  VERSION = "1.1.0"
+end
