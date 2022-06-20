@@ -20,4 +20,8 @@ RSpec.describe HighLevelBrowse do
     loaded = HighLevelBrowse.load(dir: dir)
     expect(loaded['QA1']).to eq [["Science", "Mathematics"]]
   end
+
+  it "finds a three-level item" do
+    expect(hlb["pc1100"]).to include ["Humanities", "Romance Languages and Literatures", "Italian Language and Literatures"]
+  end
 end

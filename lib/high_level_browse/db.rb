@@ -108,7 +108,7 @@ class HighLevelBrowse::DB
     # @param [Array<String>] decendent_xpaths A list of xpaths to the decendents of this node
     # @param [Array<String>] topic_array An array with all levels of the topics associated with this node
     # @return [Array<HighLevelBrowse::CallNumberRange>]
-    def cnrs_within_noko_node(node:, decendent_xpaths: ["/hlb/subject", "topic"], topic_array: [])
+    def cnrs_within_noko_node(node:, decendent_xpaths: ["/hlb/subject", "topic", "sub-topic"], topic_array: [])
       if decendent_xpaths.empty?
         [] # base case -- we're as low as we're going to go
       else
